@@ -928,6 +928,93 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- JALUR CADANGAN / PARALEL: NOTIFIKASI TELEGRAM BOT + TEMPLATE TERPISAH + TOMBOL JAPRI WA -->
+                    <div class="pt-5 border-t border-slate-200/80 space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-sky-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-sky-500/30">
+                                    <i class="fa-brands fa-telegram text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h4 class="font-extrabold text-slate-900 text-sm sm:text-base">Jalur Notifikasi Telegram Bot + Tombol Interaktif "Japri WA"</h4>
+                                        <span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-[10px] font-extrabold uppercase">Inline Button WA Aktif</span>
+                                    </div>
+                                    <p class="text-xs text-slate-500">Setiap notifikasi yang masuk ke Telegram dilengkapi tombol <b>📲 Japri WA Wali Murid</b> yang saat diklik langsung mengirim isi pesan Telegram ini ke nomor WA wali murid.</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="triggerButtonWithProgress(this, 'Mengirim Tes...', () => testSendTelegramNotification())" class="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold shadow-sm cursor-pointer shrink-0 flex items-center gap-1.5">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Tes Kirim Telegram + Tombol WA</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-sky-50/50 p-4 rounded-2xl border border-sky-200/70">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Telegram Bot Token (dari @BotFather)</label>
+                                <input type="text" id="cfg-tg-token" placeholder="Contoh: 7123456789:AAH..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:border-sky-500">
+                                <p class="text-[10px] text-slate-400 mt-1">Buat bot di <b>@BotFather</b> lalu tempel Token HTTP API-nya.</p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Chat ID Tujuan (Grup Panitia / Channel / User)</label>
+                                <input type="text" id="cfg-tg-chatid" placeholder="Contoh: -100192837465 atau 123456789" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-white focus:outline-none focus:border-sky-500">
+                                <p class="text-[10px] text-slate-400 mt-1">Gunakan awalan <code>-100...</code> untuk ID Grup/Channel Telegram.</p>
+                            </div>
+                            <div class="flex items-center">
+                                <label class="flex items-center gap-2.5 cursor-pointer bg-white border border-sky-200 p-3 rounded-xl w-full shadow-2xs">
+                                    <input type="checkbox" id="cfg-auto-tg" checked class="w-4 h-4 rounded text-sky-600">
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-800 block">Kirim Telegram Otomatis Saat Scan</span>
+                                        <span class="text-[11px] text-slate-500 block">Sertakan tombol <b>📲 Japri WA</b> di bawah pesan</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Template 3 Khusus Telegram Bot & Pratinjau Tombol Inline Japri WA -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between flex-wrap gap-1">
+                                    <label class="text-xs sm:text-sm font-extrabold text-slate-800">3. Template Khusus Pesan Telegram (Sekaligus Isi Japri WA)</label>
+                                    <div class="flex flex-wrap gap-1">
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{namasiswa}')" class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 text-[10px] font-mono font-bold cursor-pointer">+ {namasiswa}</button>
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{namapanggilan}')" class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-mono font-bold cursor-pointer">+ {namapanggilan}</button>
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{kelompok}')" class="px-2 py-0.5 rounded bg-violet-50 text-violet-700 text-[10px] font-mono font-bold cursor-pointer">+ {kelompok}</button>
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{antrian}')" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono font-bold cursor-pointer">+ {antrian}</button>
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{waktu}')" class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-mono font-bold cursor-pointer">+ {waktu}</button>
+                                        <button type="button" onclick="insertVar('tpl-notif-telegram', '{nowa}')" class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-[10px] font-mono font-bold cursor-pointer">+ {nowa}</button>
+                                    </div>
+                                </div>
+                                <textarea id="tpl-notif-telegram" rows="6" oninput="updateLiveTemplatePreview()" class="w-full p-3.5 rounded-xl border border-sky-200 text-xs font-mono bg-sky-50/30 focus:bg-white focus:outline-none focus:border-sky-500"></textarea>
+                                <p class="text-[11px] text-slate-500">💡 <b>Cara Kerja:</b> Pesan di atas dikirim ke Telegram Bot beserta tombol interaktif di bawahnya. Saat tombol diklik di Telegram, aplikasi WhatsApp langsung terbuka menuju nomor WA siswa dengan teks pesan ini.</p>
+                            </div>
+
+                            <!-- Pratinjau Bubble Chat Telegram + Tombol Inline Japri WA -->
+                            <div class="bg-[#0e1621] text-slate-100 p-4 rounded-2xl border border-sky-900/60 flex flex-col justify-between space-y-3">
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[11px] font-bold text-sky-400 flex items-center gap-1.5">
+                                            <i class="fa-brands fa-telegram text-sm"></i> Pratinjau Pesan Telegram Bot + Inline Button:
+                                        </span>
+                                        <span class="text-[10px] font-mono text-slate-400">Bot E-Presensi</span>
+                                    </div>
+                                    <div class="bg-[#182533] p-3.5 rounded-2xl rounded-tl-none border border-white/5 shadow-inner">
+                                        <pre id="live-preview-telegram" class="text-xs font-sans whitespace-pre-wrap text-slate-100 leading-relaxed"></pre>
+                                    </div>
+                                </div>
+
+                                <!-- Simulasi Tombol Inline Keyboard Telegram -->
+                                <div class="space-y-1.5">
+                                    <a id="live-preview-tg-wa-btn" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-[#2b5278]/90 hover:bg-[#34628f] text-white text-xs font-bold flex items-center justify-center gap-2 border border-sky-400/20 shadow-sm transition cursor-pointer">
+                                        <span>📲 Japri WA Wali Murid (Ahmad Fauzi Pratama)</span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-sky-300"></i>
+                                    </a>
+                                    <p class="text-[10px] text-center text-sky-300/70">👆 Klik tombol pratinjau di atas untuk menguji bagaimana tombol di dalam Telegram membuka WhatsApp wali murid.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -939,8 +1026,8 @@
                     <!-- Kiri: Pengaturan Durasi Kartu & Suara Sambutan Dinamis -->
                     <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 space-y-5">
                         <div>
-                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kartu Notifikasi & Suara Sapaan</h3>
-                            <p class="text-xs text-slate-500 mt-0.5">Atur durasi tampil pop-up kartu kehadiran serta kalimat suara otomatis saat siswa scan QR.</p>
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Pengaturan Kartu Notifikasi & Suara Sapaan Natural</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Dilengkapi <b>Normalisasi Fonetik Bahasa Indonesia</b> agar pengucapan huruf <b>"R"</b> tegas, logat natural, dan nomor antrian dibaca luwes.</p>
                         </div>
 
                         <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2">
@@ -949,6 +1036,27 @@
                                 <span id="cfg-duration-label" class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-mono text-xs font-bold">2.5 Detik</span>
                             </div>
                             <input type="range" id="cfg-card-duration-slider" min="1" max="10" step="0.5" value="2.5" oninput="updateNotificationDuration(this.value)" class="w-full accent-indigo-600 cursor-pointer">
+                        </div>
+
+                        <!-- Pilihan Mesin Suara (Engine) & Nada Ting-Tong Bandara -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200/70">
+                            <div>
+                                <label class="block text-xs font-bold text-indigo-950 mb-1">Mode Mesin Suara (Voice Engine):</label>
+                                <select id="cfg-voice-engine" onchange="changeVoiceEngineMode(this.value)" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-bold text-slate-800 bg-white focus:outline-none">
+                                    <option value="hybrid_natural">🌟 Hybrid Neural Indonesia (Huruf 'R' Jelas & Natural)</option>
+                                    <option value="web_speech">🔊 Web Speech Browser Lokal (Fonetik Teroptimasi)</option>
+                                </select>
+                            </div>
+                            <div class="flex flex-col justify-center gap-1.5 pt-1">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-800">
+                                    <input type="checkbox" id="cfg-voice-phonetic" checked onchange="toggleVoicePhoneticOption()" class="w-4 h-4 rounded text-indigo-600">
+                                    <span>Optimasi Artikulasi 'R' & Ejaan Angka</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-800">
+                                    <input type="checkbox" id="cfg-voice-chime" checked onchange="toggleVoicePhoneticOption()" class="w-4 h-4 rounded text-indigo-600">
+                                    <span>Nada Pembuka "Ting-Tong" Halus</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="space-y-2.5">
@@ -961,25 +1069,33 @@
                                 </div>
                             </div>
                             <textarea id="tpl-voice-text" rows="2" oninput="updateLiveVoicePreview(); saveStateToLocalStorage();" class="w-full p-3 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium bg-slate-50 focus:bg-white focus:outline-none focus:border-indigo-500">Selamat datang, pendamping ananda {namapanggilan}, silakan menuju {kelompok}, nomor antrian {antrian}</textarea>
-                            <div class="p-3.5 rounded-xl bg-emerald-950 text-emerald-100 text-xs">
-                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1"><i class="fa-solid fa-volume-high mr-1"></i> Pratinjau Kalimat Suara:</span>
+                            <div class="p-3.5 rounded-xl bg-emerald-950 text-emerald-100 text-xs space-y-1">
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block"><i class="fa-solid fa-volume-high mr-1"></i> Pratinjau Kalimat & Ejaan Lisan Natural:</span>
                                 <p id="live-preview-voice" class="font-semibold italic">"Selamat datang, pendamping ananda Zulfikar, silakan menuju Kelompok 3, nomor antrian 01"</p>
+                                <p id="live-preview-phonetic" class="text-[11px] text-emerald-300/90 font-mono">🎙️ Dibaca: "Selamat datang, pendamping ananda Zulfikar, silakan menuju Kelompok tiga, nomor antrian satu."</p>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Pilihan Vokal Bahasa Indonesia:</label>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Vokal Browser Cadangan:</label>
                                 <select id="cfg-voice-uri" onchange="changeSelectedVoice(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50">
                                     <option value="">Otomatis (Vokal Indonesia Terbaik)</option>
                                 </select>
                             </div>
                             <div>
                                 <div class="flex items-center justify-between text-xs mb-1">
-                                    <span class="font-bold text-slate-700">Kecepatan Bicara:</span>
-                                    <span id="cfg-voice-rate-label" class="font-mono font-bold text-indigo-600">1.0x (Ramah)</span>
+                                    <span class="font-bold text-slate-700">Kecepatan:</span>
+                                    <span id="cfg-voice-rate-label" class="font-mono font-bold text-indigo-600">0.95x (Natural)</span>
                                 </div>
-                                <input type="range" min="0.8" max="1.2" step="0.05" value="1.0" oninput="updateVoiceRate(this.value)" class="w-full accent-indigo-600 cursor-pointer">
+                                <input type="range" id="cfg-voice-rate-slider" min="0.8" max="1.2" step="0.05" value="0.95" oninput="updateVoiceRate(this.value)" class="w-full accent-indigo-600 cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between text-xs mb-1">
+                                    <span class="font-bold text-slate-700">Nada (Pitch):</span>
+                                    <span id="cfg-voice-pitch-label" class="font-mono font-bold text-indigo-600">1.00 (Jernih)</span>
+                                </div>
+                                <input type="range" id="cfg-voice-pitch-slider" min="0.85" max="1.15" step="0.05" value="1.0" oninput="updateVoicePitch(this.value)" class="w-full accent-indigo-600 cursor-pointer">
                             </div>
                         </div>
 
@@ -1214,7 +1330,11 @@ function initializeSheets() {
         ['WA_API_TOKEN', 'MASUKKAN_TOKEN_ANDA_DISINI', 'Token API dari dashboard Fonnte / Wablas'],
         ['AUTO_SEND_WA', 'TRUE', 'TRUE = kirim otomatis saat scan QR berhasil'],
         ['TPL_JAPRI_QR', 'Halo Selamat {salam} *{namasiswa}*,\n\nBerikut adalah QR Code Absensi Kegiatan Sekolah Anda ({kelompok}):\n{qrcode}\n\nTerima kasih.', 'Template Japri WA Kirim QR'],
-        ['TPL_NOTIF_HADIR', 'Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}*,\n\nSelamat datang di *{kegiatan}*.\n🏫 Kelompok: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}*\n\nTerima kasih.', 'Template WA saat scan berhasil']
+        ['TPL_NOTIF_HADIR', 'Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}*,\n\nSelamat datang di *{kegiatan}*.\n🏫 Kelompok: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}*\n\nTerima kasih.', 'Template WA saat scan berhasil'],
+        ['TPL_NOTIF_TELEGRAM', 'Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}* ({namapanggilan}).\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran telah tercatat:\n🏫 Kelompok / Ruang: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}* ({status})\n\nSilakan menuju *{kelompok}* sesuai nomor antrian Anda. Terima kasih.', 'Template khusus Telegram & isi pesan tombol Japri WA'],
+        ['TG_BOT_TOKEN', '', 'Token Bot Telegram dari @BotFather'],
+        ['TG_CHAT_ID', '', 'Chat ID Grup / Channel / User Telegram'],
+        ['AUTO_SEND_TG', 'TRUE', 'TRUE = kirim notifikasi ke Telegram saat scan']
       ]
     }
   ];
@@ -1427,6 +1547,10 @@ function handleScanAttendance(payload) {
     if (payload.sendWa && payload.waToken && payload.noWa) {
       statusNotif = sendWhatsAppGateway(payload.waProvider, payload.waToken, payload.noWa, payload.waMessage);
     }
+    if (payload.sendTg && payload.tgToken && payload.tgChatId) {
+      const tgStatus = sendTelegramBotGateway(payload.tgToken, payload.tgChatId, payload.tgMessage || payload.waMessage, payload.noWa, payload.namaSiswa);
+      statusNotif = statusNotif === 'Terkirim via Antrean' ? tgStatus : (statusNotif + ' | ' + tgStatus);
+    }
 
     logSheet.appendRow([
       idLog,
@@ -1535,7 +1659,11 @@ function saveConfigSheet(cfg) {
     ['WA_API_TOKEN', cfg.waToken || '', 'Token API dari dashboard Fonnte / Wablas'],
     ['AUTO_SEND_WA', cfg.autoWaOnScan ? 'TRUE' : 'FALSE', 'TRUE = kirim otomatis saat scan QR berhasil'],
     ['TPL_JAPRI_QR', cfg.tplJapriQr || '', 'Template Japri WA Kirim QR'],
-    ['TPL_NOTIF_HADIR', cfg.tplNotifHadir || '', 'Template WA saat scan berhasil']
+    ['TPL_NOTIF_HADIR', cfg.tplNotifHadir || '', 'Template WA saat scan berhasil'],
+    ['TPL_NOTIF_TELEGRAM', cfg.tplNotifTelegram || '', 'Template khusus Telegram & isi pesan tombol Japri WA'],
+    ['TG_BOT_TOKEN', cfg.tgBotToken || '', 'Token Bot Telegram dari @BotFather'],
+    ['TG_CHAT_ID', cfg.tgChatId || '', 'Chat ID Grup / Channel / User Telegram'],
+    ['AUTO_SEND_TG', cfg.autoTgOnScan ? 'TRUE' : 'FALSE', 'TRUE = kirim notifikasi ke Telegram saat scan']
   ];
   sheet.getRange(2, 1, rows.length, 3).setValues(rows);
   return { status: 'success' };
@@ -1569,9 +1697,41 @@ function sendWhatsAppGateway(provider, token, targetPhone, message) {
       payload: { target: String(targetPhone), phone: String(targetPhone), message: message },
       muteHttpExceptions: true
     });
-    return 'Terkirim (' + res.getResponseCode() + ')';
+    return 'WA (' + res.getResponseCode() + ')';
   } catch (e) {
     return 'Gagal WA: ' + e.message;
+  }
+}
+
+function sendTelegramBotGateway(botToken, chatId, message, targetPhone, studentName) {
+  try {
+    const url = 'https://api.telegram.org/bot' + String(botToken).trim() + '/sendMessage';
+    let cleanPhone = String(targetPhone || '').replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+
+    const payloadObj = {
+      chat_id: String(chatId).trim(),
+      text: message
+    };
+
+    if (cleanPhone) {
+      const waDirectUrl = 'https://wa.me/' + cleanPhone + '?text=' + encodeURIComponent(message);
+      payloadObj.reply_markup = {
+        inline_keyboard: [[
+          { text: '📲 Japri WA Wali Murid (' + (studentName || cleanPhone) + ')', url: waDirectUrl }
+        ]]
+      };
+    }
+
+    const res = UrlFetchApp.fetch(url, {
+      method: 'post',
+      contentType: 'application/json',
+      payload: JSON.stringify(payloadObj),
+      muteHttpExceptions: true
+    });
+    return 'TG (' + res.getResponseCode() + ')';
+  } catch (e) {
+    return 'Gagal TG: ' + e.message;
   }
 }
 
@@ -1873,6 +2033,8 @@ function jsonResponse(obj) {
          JAVASCRIPT APPLICATION LOGIC
          ========================================== -->
     <script>
+        const DEFAULT_GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwnFrOsqglc89_c__7toIkynxvtUeFwkoIqWqzG50-1G_rSdMaWeFjaywE7_aZM09PF/exec';
+
         const state = {
             activeEventId: 'KEG-001',
             cameraActive: false,
@@ -1884,19 +2046,26 @@ function jsonResponse(obj) {
                 appPassword: 'admin123',
                 runningText: '✨ Selamat datang di Sistem Presensi QR Code Sekolah — Silakan arahkan Kartu QR Code Anda ke kamera pemindai. ✨',
                 runningSpeed: 22,
-                gasUrl: '',
+                gasUrl: DEFAULT_GAS_WEBAPP_URL,
                 productionMode: false,
                 includeQrUrlInWaText: true,
                 waProvider: '',
                 waToken: '',
                 autoWaOnScan: true,
+                tgBotToken: '',
+                tgChatId: '',
+                autoTgOnScan: true,
                 cardDurationSec: 2.5,
-                voiceRate: 1.0,
-                voicePitch: 1.05,
+                voiceEngine: 'hybrid_natural',
+                voicePhoneticR: true,
+                voiceChime: true,
+                voiceRate: 0.95,
+                voicePitch: 1.0,
                 selectedVoiceURI: '',
                 tplVoiceText: `Selamat datang, pendamping ananda {namapanggilan}, silakan menuju {kelompok}, nomor antrian {antrian}`,
                 tplJapriQr: `Halo Selamat {salam} *{namasiswa}*,\n\nBerikut adalah tautan Kartu QR Code Absensi Kegiatan Sekolah Anda (NISN: *{nisn}* - *{kelompok}*):\n{qrcode}\n\nSilakan simpan atau tunjukkan QR Code tersebut kepada petugas saat kegiatan berlangsung. Terima kasih.`,
-                tplNotifHadir: `Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}*,\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran berhasil tercatat:\n🏫 Kelompok / Ruangan: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}*\n\nSilakan menuju ruangan *{kelompok}* sesuai nomor antrian Anda. Terima kasih.`
+                tplNotifHadir: `Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}*,\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran berhasil tercatat:\n🏫 Kelompok / Ruangan: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}*\n\nSilakan menuju ruangan *{kelompok}* sesuai nomor antrian Anda. Terima kasih.`,
+                tplNotifTelegram: `Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}* ({namapanggilan}).\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran berhasil tercatat:\n🏫 Kelompok / Ruangan: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}* ({status})\n\nSilakan menuju ruangan *{kelompok}* sesuai nomor antrian Anda. Terima kasih.`
             },
             kegiatan: [
                 { id: 'KEG-001', nama: 'Observasi & Wawancara SPMB', tanggal: '2025-05-12', mulai: '06:30', batasTerlambat: '07:30', lokasi: 'Gedung Utama Sekolah', status: 'Aktif' },
@@ -1934,7 +2103,6 @@ function jsonResponse(obj) {
 
         /**
          * SIDEBAR COLLAPSE & SMART FULLSCREEN KIOSK CONTROLLER (Esc to Exit)
-         * Mendukung Native Fullscreen (di Vercel) & In-Window Kiosk Fallback (di Google Sites / Iframe)
          */
         function toggleSidebar(forceState) {
             state.sidebarCollapsed = typeof forceState === 'boolean' ? forceState : !state.sidebarCollapsed;
@@ -1996,9 +2164,7 @@ function jsonResponse(obj) {
                     showToast('Mode Fullscreen Aktif! Tekan tombol Esc untuk keluar.', 'info');
                     return;
                 }
-            } catch (err) {
-                // Fallback otomatis jika dijalankan di dalam iframe Google Sites / Preview Sandbox
-            }
+            } catch (err) {}
 
             document.body.classList.add('kiosk-inwindow-mode');
             toggleSidebar(true);
@@ -2023,9 +2189,6 @@ function jsonResponse(obj) {
             }
         });
 
-        /**
-         * CALCULATE NEXT 2-DIGIT QUEUE NUMBER PER (KEGIATAN + KELOMPOK)
-         */
         function getNextQueueNumberForKelompok(idKegiatan, kelompokName) {
             const cleanKelompok = String(kelompokName || 'Kelompok 1').trim().toLowerCase();
             const countInGroup = state.logs.filter(l =>
@@ -2035,9 +2198,6 @@ function jsonResponse(obj) {
             return String(countInGroup + 1).padStart(2, '0');
         }
 
-        /**
-         * UNIVERSAL BUTTON PRESS-DOWN + PROGRESS ANIMATION HELPER
-         */
         async function triggerButtonWithProgress(btnEl, loadingText, actionCallback) {
             if (!btnEl || btnEl.dataset.busy === '1') {
                 if (typeof actionCallback === 'function') return actionCallback();
@@ -2079,31 +2239,54 @@ function jsonResponse(obj) {
                     const parsed = JSON.parse(raw);
                     Object.assign(state.config, parsed);
                 }
+                if (!state.config.gasUrl) {
+                    state.config.gasUrl = DEFAULT_GAS_WEBAPP_URL;
+                }
                 const gasEl = document.getElementById('cfg-gas-url');
                 const provEl = document.getElementById('cfg-wa-provider');
                 const tokEl = document.getElementById('cfg-wa-token');
                 const autoWaEl = document.getElementById('cfg-auto-wa');
+                const tgTokEl = document.getElementById('cfg-tg-token');
+                const tgChatEl = document.getElementById('cfg-tg-chatid');
+                const autoTgEl = document.getElementById('cfg-auto-tg');
                 const tplJapriEl = document.getElementById('tpl-japri-qr');
                 const tplNotifEl = document.getElementById('tpl-notif-hadir');
+                const tplTgEl = document.getElementById('tpl-notif-telegram');
                 const tplVoiceEl = document.getElementById('tpl-voice-text');
                 const passEl = document.getElementById('cfg-app-password');
                 const prodEl = document.getElementById('cfg-production-mode');
                 const runTextEl = document.getElementById('cfg-running-text');
                 const runSpeedEl = document.getElementById('cfg-running-speed');
+                const voiceEngEl = document.getElementById('cfg-voice-engine');
+                const voicePhonEl = document.getElementById('cfg-voice-phonetic');
+                const voiceChimeEl = document.getElementById('cfg-voice-chime');
+                const voiceRateEl = document.getElementById('cfg-voice-rate-slider');
+                const voicePitchEl = document.getElementById('cfg-voice-pitch-slider');
 
                 if (gasEl) gasEl.value = state.config.gasUrl || '';
                 if (provEl) provEl.value = state.config.waProvider || '';
                 if (tokEl) tokEl.value = state.config.waToken || '';
                 if (autoWaEl) autoWaEl.checked = Boolean(state.config.autoWaOnScan);
+                if (tgTokEl) tgTokEl.value = state.config.tgBotToken || '';
+                if (tgChatEl) tgChatEl.value = state.config.tgChatId || '';
+                if (autoTgEl) autoTgEl.checked = state.config.autoTgOnScan !== false;
                 if (prodEl) prodEl.checked = Boolean(state.config.productionMode);
                 if (tplJapriEl && state.config.tplJapriQr) tplJapriEl.value = state.config.tplJapriQr;
                 if (tplNotifEl && state.config.tplNotifHadir) tplNotifEl.value = state.config.tplNotifHadir;
+                if (tplTgEl && state.config.tplNotifTelegram) tplTgEl.value = state.config.tplNotifTelegram;
                 if (tplVoiceEl && state.config.tplVoiceText) tplVoiceEl.value = state.config.tplVoiceText;
                 if (passEl && state.config.appPassword) passEl.value = state.config.appPassword;
                 if (runTextEl && state.config.runningText) runTextEl.value = state.config.runningText;
                 if (runSpeedEl && state.config.runningSpeed) runSpeedEl.value = state.config.runningSpeed;
+                if (voiceEngEl && state.config.voiceEngine) voiceEngEl.value = state.config.voiceEngine;
+                if (voicePhonEl) voicePhonEl.checked = state.config.voicePhoneticR !== false;
+                if (voiceChimeEl) voiceChimeEl.checked = state.config.voiceChime !== false;
+                if (voiceRateEl && state.config.voiceRate) voiceRateEl.value = state.config.voiceRate;
+                if (voicePitchEl && state.config.voicePitch) voicePitchEl.value = state.config.voicePitch;
 
                 updateNotificationDuration(state.config.cardDurationSec || 2.5);
+                updateVoiceRate(state.config.voiceRate || 0.95);
+                updateVoicePitch(state.config.voicePitch || 1.0);
                 updateRunningTextBannerUI();
                 applyProductionModeUI();
                 updateGasConnectionBadges();
@@ -2237,6 +2420,14 @@ function jsonResponse(obj) {
             if (hour >= 11 && hour < 15) return 'Siang';
             if (hour >= 15 && hour < 18) return 'Sore';
             return 'Malam';
+        }
+
+        function formatWaNumber(rawPhone) {
+            let clean = String(rawPhone || '').replace(/[^0-9]/g, '');
+            if (clean.startsWith('0')) {
+                clean = '62' + clean.slice(1);
+            }
+            return clean;
         }
 
         function getQrImageUrl(nisn) {
@@ -2377,6 +2568,7 @@ function jsonResponse(obj) {
                         panggilan: student.panggilan || formatNamaPanggilan(student),
                         nisn: student.nisn,
                         kelas: student.kelas,
+                        kelompok: student.kelompok || 'Kelompok 1',
                         statusPeserta: student.statusPeserta || 'CALON SISWA',
                         kegiatan: activeEvent ? activeEvent.nama : 'Kegiatan Sekolah',
                         waktu: '-',
@@ -2475,7 +2667,111 @@ function jsonResponse(obj) {
             return parts[0];
         }
 
+        function angkaKeKataIndonesia(numInput) {
+            const n = parseInt(String(numInput).replace(/[^0-9]/g, ''), 10);
+            if (isNaN(n) || n <= 0) return String(numInput);
+            const satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+            if (n < 12) return satuan[n];
+            if (n < 20) return angkaKeKataIndonesia(n - 10) + ' belas';
+            if (n < 100) {
+                const puluh = Math.floor(n / 10);
+                const sisa = n % 10;
+                return satuan[puluh] + ' puluh' + (sisa > 0 ? ' ' + satuan[sisa] : '');
+            }
+            if (n < 200) return 'seratus' + (n - 100 > 0 ? ' ' + angkaKeKataIndonesia(n - 100) : '');
+            if (n < 1000) {
+                const ratus = Math.floor(n / 100);
+                const sisa = n % 100;
+                return satuan[ratus] + ' ratus' + (sisa > 0 ? ' ' + angkaKeKataIndonesia(sisa) : '');
+            }
+            return String(n);
+        }
+
         let cachedIndonesianVoice = null;
+        let currentCloudAudio = null;
+
+        /**
+         * NORMALISASI EJAAN LISAN & LOGAT NATURAL BAHASA INDONESIA
+         * Menjaga ejaan kata "antrian" tetap alami dan mengubah angka "01" menjadi "satu"
+         * agar diucapkan dengan logat penutur asli Indonesia yang luwes.
+         */
+        function normalizeIndonesianPhonetics(rawText) {
+            let text = String(rawText || '').trim();
+            if (!text) return '';
+
+            // Pastikan tidak ada ejaan "antre-an" yang tersisa
+            text = text.replace(/\bantre-an\b/gi, 'antrian');
+
+            if (state.config.voicePhoneticR === false) {
+                return text.replace(/,\s*/g, ', ');
+            }
+
+            // 1. Ubah "Kelompok 1" -> "Kelompok satu", "Ruang 2" -> "Ruang dua"
+            text = text.replace(/\b(kelompok|ruang|ruangan|loket|meja)\s+0*([1-9][0-9]*)\b/gi, (_, prefix, num) => {
+                return `${prefix} ${angkaKeKataIndonesia(num)}`;
+            });
+
+            // 2. Ubah "nomor antrian 01" atau "antrian #01" -> "nomor antrian satu" (tetap mengeja "antrian" secara natural)
+            text = text.replace(/\b(nomor\s+antrian|antrian|nomor)\s*#?\s*0*([1-9][0-9]*)\b/gi, (_, label, num) => {
+                const cleanLabel = label.replace(/\s+/g, ' ').trim();
+                return `${cleanLabel} ${angkaKeKataIndonesia(num)}`;
+            });
+
+            // 3. Jika ada angka berawalan nol yang berdiri sendiri seperti "#01" atau "01" -> "satu"
+            text = text.replace(/#?0+([1-9][0-9]*)\b/g, (_, num) => angkaKeKataIndonesia(num));
+
+            // 4. Rapikan spasi dan tanda baca agar intonasi jeda terdengar ramah & mengalir
+            text = text
+                .replace(/,\s*/g, ', ')
+                .replace(/\s{2,}/g, ' ')
+                .trim();
+
+            if (!/[.!?]$/.test(text)) {
+                text += '.';
+            }
+            return text;
+        }
+
+        /**
+         * NADA PEMBUKA "TING-TONG" HALUS ALA BANDARA SEBELUM SUARA SAPAAN
+         */
+        function playSoftAnnouncementChime() {
+            return new Promise((resolve) => {
+                if (state.config.voiceChime === false) {
+                    resolve();
+                    return;
+                }
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                    const now = audioCtx.currentTime;
+                    // Nada Ding (G5 - 783.99Hz) -> Dong (E5 - 659.25Hz)
+                    const notes = [
+                        { freq: 783.99, start: 0, dur: 0.28 },
+                        { freq: 659.25, start: 0.22, dur: 0.42 }
+                    ];
+                    notes.forEach(n => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(n.freq, now + n.start);
+                        gain.gain.setValueAtTime(0.08, now + n.start);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + n.start);
+                        osc.stop(now + n.start + n.dur);
+                    });
+                    setTimeout(resolve, 480);
+                } catch (e) {
+                    resolve();
+                }
+            });
+        }
 
         function loadAndSelectIndonesianVoice() {
             if (!('speechSynthesis' in window)) return null;
@@ -2483,10 +2779,11 @@ function jsonResponse(obj) {
             if (!voices || voices.length === 0) return null;
 
             const voiceSelect = document.getElementById('cfg-voice-uri');
+            // Hanya utamakan vokal yang benar-benar berlogat Indonesia (id-ID / in-ID) agar tidak memakai vokal Inggris yang cadel 'R'
             const idVoices = voices.filter(v => {
                 const lang = (v.lang || '').toLowerCase();
                 const name = (v.name || '').toLowerCase();
-                return lang.includes('id') || lang.includes('in') || name.includes('indonesia') || name.includes('gadis') || name.includes('ardi') || name.includes('damayanti');
+                return lang.includes('id') || lang.includes('in-id') || name.includes('indonesia') || name.includes('gadis') || name.includes('ardi') || name.includes('damayanti');
             });
 
             if (voiceSelect) {
@@ -2508,16 +2805,19 @@ function jsonResponse(obj) {
                 }
             }
 
+            // Urutan prioritas vokal Neural Bahasa Indonesia asli (logat natural & huruf 'R' jelas)
+            // Menghindari suara desktop lama (seperti Microsoft Andika offline) jika tersedia vokal Neural/Google
             const priorityChecks = [
-                v => /natural/i.test(v.name) && /gadis/i.test(v.name),
-                v => /gadis/i.test(v.name),
+                v => /natural/i.test(v.name) && (/gadis/i.test(v.name) || /ardi/i.test(v.name)),
+                v => /online/i.test(v.name) && (/gadis/i.test(v.name) || /ardi/i.test(v.name)),
                 v => /google/i.test(v.name) && (/indonesia/i.test(v.name) || /id[-_]id/i.test(v.lang) || /in[-_]id/i.test(v.lang)),
-                v => /natural/i.test(v.name) && (/id[-_]id/i.test(v.lang) || /indonesia/i.test(v.name)),
-                v => /damayanti/i.test(v.name),
+                v => /gadis/i.test(v.name),
                 v => /ardi/i.test(v.name),
+                v => /damayanti/i.test(v.name),
+                v => ((v.lang || '').toLowerCase() === 'id-id' || (v.lang || '').toLowerCase() === 'in-id') && !/andika/i.test(v.name),
                 v => (v.lang || '').toLowerCase() === 'id-id',
                 v => (v.lang || '').toLowerCase() === 'in-id',
-                v => (v.lang || '').toLowerCase().startsWith('id') || (v.lang || '').toLowerCase().startsWith('in')
+                v => (v.lang || '').toLowerCase().startsWith('id')
             ];
 
             for (const checkFn of priorityChecks) {
@@ -2537,10 +2837,41 @@ function jsonResponse(obj) {
             setTimeout(loadAndSelectIndonesianVoice, 150);
         }
 
-        function speakWelcomeAttendance(studentOrName, logItemObj) {
+        function speakWithWebSpeechAPI(phoneticText, voicePill) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(phoneticText);
+            utterance.lang = 'id-ID';
+            utterance.rate = Number(state.config.voiceRate) || 0.95;
+            utterance.pitch = Number(state.config.voicePitch) || 1.0;
+            utterance.volume = 1.0;
+
+            const bestVoice = cachedIndonesianVoice || loadAndSelectIndonesianVoice();
+            if (bestVoice) {
+                utterance.voice = bestVoice;
+                utterance.lang = bestVoice.lang || 'id-ID';
+            }
+
+            utterance.onend = () => {
+                if (voicePill) voicePill.classList.add('hidden');
+            };
+            utterance.onerror = () => {
+                if (voicePill) voicePill.classList.add('hidden');
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        async function speakWelcomeAttendance(studentOrName, logItemObj) {
             try {
-                if (!('speechSynthesis' in window)) return;
-                window.speechSynthesis.cancel();
+                if (currentCloudAudio) {
+                    currentCloudAudio.pause();
+                    currentCloudAudio = null;
+                }
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
 
                 let studentObj = typeof studentOrName === 'object'
                     ? studentOrName
@@ -2554,37 +2885,67 @@ function jsonResponse(obj) {
                     kelompok: (logItemObj && logItemObj.kelompok) || 'Kelompok 1',
                     antrian: (logItemObj && logItemObj.antrian) || '01'
                 }, null, logItemObj);
-                const textToSpeech = rawSpeech.replace(/,\s*/g, ', ');
 
-                const utterance = new SpeechSynthesisUtterance(textToSpeech);
-                utterance.lang = 'id-ID';
-                utterance.rate = Number(state.config.voiceRate) || 1.0;
-                utterance.pitch = Number(state.config.voicePitch) || 1.05;
-                utterance.volume = 1.0;
-
-                const bestVoice = cachedIndonesianVoice || loadAndSelectIndonesianVoice();
-                if (bestVoice) {
-                    utterance.voice = bestVoice;
-                    utterance.lang = bestVoice.lang || 'id-ID';
-                }
-
+                const phoneticText = normalizeIndonesianPhonetics(rawSpeech);
                 const voicePill = document.getElementById('arrival-voice-Pill');
-                if (voicePill) {
-                    voicePill.classList.remove('hidden');
-                }
-                utterance.onend = () => {
-                    if (voicePill) voicePill.classList.add('hidden');
-                };
+                if (voicePill) voicePill.classList.remove('hidden');
 
-                window.speechSynthesis.speak(utterance);
+                await playSoftAnnouncementChime();
+
+                // Cek apakah browser memiliki vokal Neural Bahasa Indonesia asli (Google Bahasa Indonesia / Gadis / Ardi)
+                // Jika hanya memiliki vokal desktop robotik (seperti Microsoft Andika offline) atau vokal Inggris,
+                // gunakan Neural Audio Bahasa Indonesia agar logat & pengucapan kata "antrian" serta huruf 'R' 100% natural.
+                const bestLocalVoice = cachedIndonesianVoice || loadAndSelectIndonesianVoice();
+                const isHighQualityNeuralId = bestLocalVoice && (
+                    /google.*indonesia|gadis|ardi|damayanti|natural/i.test(bestLocalVoice.name) ||
+                    (/google/i.test(bestLocalVoice.name) && /id|in/i.test(bestLocalVoice.lang))
+                );
+
+                if (state.config.voiceEngine === 'hybrid_natural' && !isHighQualityNeuralId) {
+                    try {
+                        const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=id&dt=t&q=${encodeURIComponent(phoneticText)}`;
+                        const audio = new Audio(ttsUrl);
+                        audio.playbackRate = Number(state.config.voiceRate) || 0.98;
+                        currentCloudAudio = audio;
+                        audio.onended = () => {
+                            if (voicePill) voicePill.classList.add('hidden');
+                        };
+                        audio.onerror = () => {
+                            speakWithWebSpeechAPI(phoneticText, voicePill);
+                        };
+                        await audio.play();
+                        return;
+                    } catch (cloudErr) {
+                        speakWithWebSpeechAPI(phoneticText, voicePill);
+                        return;
+                    }
+                }
+
+                speakWithWebSpeechAPI(phoneticText, voicePill);
             } catch (e) {}
         }
 
         function testIndonesianVoice() {
             const sampleStudent = state.siswa.find(s => s.nisn === '0081234565') || state.siswa[0];
             speakWelcomeAttendance(sampleStudent);
-            const previewSentence = buildVoiceTextFromTemplate(sampleStudent);
-            showToast(`Menguji Vokal (Kecepatan ${(state.config.voiceRate || 1.0).toFixed(1)}x): "${previewSentence}"`, 'info');
+            const rawSentence = buildVoiceTextFromTemplate(sampleStudent);
+            const phoneticSentence = normalizeIndonesianPhonetics(rawSentence);
+            showToast(`Menguji Suara Natural: "${phoneticSentence}"`, 'info');
+        }
+
+        function changeVoiceEngineMode(val) {
+            state.config.voiceEngine = val || 'hybrid_natural';
+            saveStateToLocalStorage();
+            testIndonesianVoice();
+        }
+
+        function toggleVoicePhoneticOption() {
+            const phonEl = document.getElementById('cfg-voice-phonetic');
+            const chimeEl = document.getElementById('cfg-voice-chime');
+            if (phonEl) state.config.voicePhoneticR = phonEl.checked;
+            if (chimeEl) state.config.voiceChime = chimeEl.checked;
+            updateLiveVoicePreview();
+            saveStateToLocalStorage();
         }
 
         function updateNotificationDuration(val) {
@@ -2602,11 +2963,21 @@ function jsonResponse(obj) {
         }
 
         function updateVoiceRate(val) {
-            const rate = Math.min(1.2, Math.max(0.75, parseFloat(val) || 1.0));
+            const rate = Math.min(1.2, Math.max(0.75, parseFloat(val) || 0.95));
             state.config.voiceRate = rate;
             const label = document.getElementById('cfg-voice-rate-label');
             if (label) {
-                label.textContent = rate === 1.0 ? '1.0x (Ramah)' : `${rate.toFixed(2)}x`;
+                label.textContent = rate === 0.95 ? '0.95x (Natural)' : `${rate.toFixed(2)}x`;
+            }
+            saveStateToLocalStorage();
+        }
+
+        function updateVoicePitch(val) {
+            const pitch = Math.min(1.15, Math.max(0.85, parseFloat(val) || 1.0));
+            state.config.voicePitch = pitch;
+            const label = document.getElementById('cfg-voice-pitch-label');
+            if (label) {
+                label.textContent = pitch === 1.0 ? '1.00 (Jernih)' : pitch.toFixed(2);
             }
             saveStateToLocalStorage();
         }
@@ -2712,6 +3083,7 @@ function jsonResponse(obj) {
             const namaPanggilan = data.panggilan || formatNamaPanggilan(data.nama || '');
             const kelompokStr = data.kelompok || 'Kelompok 1';
             const antrianStr = data.antrian ? String(data.antrian).padStart(2, '0') : '01';
+            const noWaStr = formatWaNumber(data.wa || data.noWa || '');
             let result = (templateStr || '')
                 .replace(/\{salam\}/gi, salam)
                 .replace(/\{namasiswa\}/gi, data.nama || '-')
@@ -2720,6 +3092,7 @@ function jsonResponse(obj) {
                 .replace(/\{kelas\}/gi, data.kelas || '-')
                 .replace(/\{kelompok\}/gi, kelompokStr)
                 .replace(/\{antrian\}/gi, antrianStr)
+                .replace(/\{nowa\}/gi, noWaStr || '-')
                 .replace(/\{badge\}/gi, data.statusPeserta || 'CALON SISWA')
                 .replace(/\{qrcode\}/gi, qrUrl)
                 .replace(/\{kegiatan\}/gi, data.kegiatan || '-')
@@ -3224,10 +3597,13 @@ function jsonResponse(obj) {
                             <span class="px-2.5 py-1 rounded-full text-xs font-bold border ${statusBadge}">${l.status}</span>
                         </td>
                         <td class="py-3 px-4">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-xs text-emerald-700 font-medium"><i class="fa-brands fa-whatsapp mr-1"></i>${l.waStatus}</span>
-                                <button type="button" onclick="sendManualArrivalWa('${l.nisn}', '${l.waktu}', '${l.status}', '${l.namaKegiatan}', '${kelompok}', '${antrian}')" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold cursor-pointer" title="Kirim Ulang WA">
-                                    Kirim WA
+                                <button type="button" onclick="sendManualArrivalWa('${l.nisn}', '${l.waktu}', '${l.status}', '${l.namaKegiatan}', '${kelompok}', '${antrian}')" class="px-2 py-1 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold cursor-pointer" title="Kirim Pesan WA ke Wali Murid">
+                                    Japri WA
+                                </button>
+                                <button type="button" onclick="resendTelegramFromLog('${l.id}')" class="px-2 py-1 rounded bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[11px] font-bold cursor-pointer" title="Kirim ke Telegram Bot dengan Tombol Japri WA">
+                                    <i class="fa-brands fa-telegram mr-0.5"></i>TG
                                 </button>
                             </div>
                         </td>
@@ -3279,6 +3655,21 @@ function jsonResponse(obj) {
                 kelas: student.kelas,
                 kelompok: kelompokSiswa,
                 antrian: nomorAntrian,
+                wa: student.wa,
+                statusPeserta: student.statusPeserta || 'CALON SISWA',
+                kegiatan: activeEvent.nama,
+                waktu: waktuStr,
+                status: statusKehadiran
+            });
+
+            const tgMessage = parseTemplateMessage(state.config.tplNotifTelegram || state.config.tplNotifHadir, {
+                nama: student.nama,
+                panggilan: student.panggilan || formatNamaPanggilan(student),
+                nisn: student.nisn,
+                kelas: student.kelas,
+                kelompok: kelompokSiswa,
+                antrian: nomorAntrian,
+                wa: student.wa,
                 statusPeserta: student.statusPeserta || 'CALON SISWA',
                 kegiatan: activeEvent.nama,
                 waktu: waktuStr,
@@ -3305,15 +3696,161 @@ function jsonResponse(obj) {
                 status: statusKehadiran,
                 wa: student.wa,
                 waStatus: waStatusLabel,
-                waMessage: waMessage
+                waMessage: waMessage,
+                tgMessage: tgMessage
             };
 
             state.logs.unshift(newLog);
             displayArrivalCard(newLog, student, false);
             renderAll();
 
+            // Kirim ke Telegram Bot secara langsung beserta Tombol Inline Japri WA
+            if (state.config.autoTgOnScan && state.config.tgBotToken && state.config.tgChatId) {
+                sendTelegramAttendanceDirect(newLog);
+            }
+
             if (state.config.gasUrl) {
                 sendAttendanceToGAS(newLog);
+            }
+        }
+
+        /**
+         * PENGIRIMAN NOTIFIKASI LANGSUNG KE TELEGRAM BOT API + TOMBOL INLINE "JAPRI WA WALI MURID"
+         * Saat tombol di dalam pesan Telegram diklik, langsung membuka WhatsApp wali murid dengan pesan Telegram tersebut.
+         */
+        async function sendTelegramAttendanceDirect(logItem) {
+            const token = (state.config.tgBotToken || document.getElementById('cfg-tg-token')?.value || '').trim();
+            const chatId = (state.config.tgChatId || document.getElementById('cfg-tg-chatid')?.value || '').trim();
+            if (!token || !chatId) return false;
+
+            const studentObj = state.siswa.find(s => s.nisn === logItem.nisn);
+            const rawWa = logItem.wa || (studentObj ? studentObj.wa : '');
+            const cleanPhone = formatWaNumber(rawWa);
+
+            const tgText = logItem.tgMessage || parseTemplateMessage(state.config.tplNotifTelegram || state.config.tplNotifHadir, {
+                nama: logItem.namaSiswa,
+                panggilan: logItem.panggilan || formatNamaPanggilan(logItem.namaSiswa),
+                nisn: logItem.nisn,
+                kelas: logItem.kelas || (studentObj ? studentObj.kelas : '-'),
+                kelompok: logItem.kelompok || 'Kelompok 1',
+                antrian: logItem.antrian || '01',
+                wa: cleanPhone,
+                statusPeserta: logItem.statusPeserta || 'CALON SISWA',
+                kegiatan: logItem.namaKegiatan,
+                waktu: logItem.waktu,
+                status: logItem.status
+            });
+
+            // Buat URL WhatsApp langsung ke nomor WA user berisi pesan Telegram ini
+            const waTargetPhone = cleanPhone || '6281234567801';
+            const waDirectUrl = `https://wa.me/${waTargetPhone}?text=${encodeURIComponent(tgText)}`;
+
+            const payload = {
+                chat_id: chatId,
+                text: tgText,
+                parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: `📲 Japri WA Wali Murid (${logItem.panggilan || logItem.namaSiswa})`,
+                                url: waDirectUrl
+                            }
+                        ]
+                    ]
+                }
+            };
+
+            try {
+                let res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                let json = await res.json();
+
+                // Fallback tanpa parse_mode jika user mengetik karakter Markdown yang tidak berpasangan di template
+                if (!json || !json.ok) {
+                    delete payload.parse_mode;
+                    res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    json = await res.json();
+                }
+
+                if (json && json.ok) {
+                    logItem.waStatus = logItem.waStatus.includes('Telegram')
+                        ? logItem.waStatus
+                        : `${logItem.waStatus} + ✓ Telegram`;
+                    renderLogTable();
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        async function resendTelegramFromLog(logId) {
+            const logItem = state.logs.find(l => l.id === logId);
+            if (!logItem) return;
+            if (!state.config.tgBotToken || !state.config.tgChatId) {
+                showToast('Atur Telegram Bot Token & Chat ID terlebih dahulu di menu Template WA!', 'warning');
+                switchTab('pengaturan');
+                return;
+            }
+            const ok = await sendTelegramAttendanceDirect(logItem);
+            if (ok) {
+                showToast(`Notifikasi & Tombol Japri WA untuk ${logItem.namaSiswa} terkirim ke Telegram!`, 'success');
+            } else {
+                showToast('Gagal mengirim ke Telegram. Periksa Token & Chat ID Anda.', 'error');
+            }
+        }
+
+        async function testSendTelegramNotification() {
+            const tokenEl = document.getElementById('cfg-tg-token');
+            const chatEl = document.getElementById('cfg-tg-chatid');
+            const tplTgEl = document.getElementById('tpl-notif-telegram');
+            if (tokenEl) state.config.tgBotToken = tokenEl.value.trim();
+            if (chatEl) state.config.tgChatId = chatEl.value.trim();
+            if (tplTgEl) state.config.tplNotifTelegram = tplTgEl.value;
+            saveStateToLocalStorage();
+
+            if (!state.config.tgBotToken || !state.config.tgChatId) {
+                showToast('Masukkan Telegram Bot Token dan Chat ID terlebih dahulu!', 'warning');
+                tokenEl?.focus();
+                return;
+            }
+
+            const sampleStudent = state.siswa[0] || {
+                nisn: '0081234561',
+                nama: 'Ahmad Fauzi Pratama',
+                panggilan: 'Fauzi',
+                kelas: 'XII IPA 1',
+                kelompok: 'Kelompok 1',
+                wa: '6281234567801'
+            };
+            const activeEv = state.kegiatan.find(k => k.id === state.activeEventId) || state.kegiatan[0];
+            const nowStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(/\./g, ':') + ' WIB';
+
+            const ok = await sendTelegramAttendanceDirect({
+                namaSiswa: sampleStudent.nama,
+                panggilan: sampleStudent.panggilan || 'Fauzi',
+                nisn: sampleStudent.nisn,
+                kelas: sampleStudent.kelas || 'XII IPA 1',
+                kelompok: sampleStudent.kelompok || 'Kelompok 1',
+                antrian: '01',
+                wa: sampleStudent.wa || '6281234567801',
+                namaKegiatan: activeEv ? activeEv.nama : 'Observasi & Wawancara SPMB',
+                waktu: nowStr,
+                status: 'Tepat Waktu',
+                waStatus: 'Tes Telegram'
+            });
+
+            if (ok) {
+                showToast('Berhasil! Cek Telegram Anda dan klik tombol "📲 Japri WA Wali Murid" di bawah pesan.', 'success');
+            } else {
+                showToast('Gagal mengirim ke Telegram. Periksa kembali Bot Token & Chat ID (pastikan Bot sudah di-Start / dimasukkan ke Grup).', 'error');
             }
         }
 
@@ -3697,16 +4234,28 @@ function jsonResponse(obj) {
         function updateLiveTemplatePreview() {
             const tplJapriEl = document.getElementById('tpl-japri-qr');
             const tplNotifEl = document.getElementById('tpl-notif-hadir');
+            const tplTgEl = document.getElementById('tpl-notif-telegram');
             if (tplJapriEl) state.config.tplJapriQr = tplJapriEl.value;
             if (tplNotifEl) state.config.tplNotifHadir = tplNotifEl.value;
+            if (tplTgEl) state.config.tplNotifTelegram = tplTgEl.value;
 
-            const sampleData = {
+            const sampleStudent = state.siswa[0] || {
                 nama: 'Ahmad Fauzi Pratama',
                 panggilan: 'Fauzi',
                 nisn: '0081234561',
                 kelas: 'XII IPA 1',
                 kelompok: 'Kelompok 1',
+                wa: '6281234567801'
+            };
+
+            const sampleData = {
+                nama: sampleStudent.nama,
+                panggilan: sampleStudent.panggilan || 'Fauzi',
+                nisn: sampleStudent.nisn,
+                kelas: sampleStudent.kelas || 'XII IPA 1',
+                kelompok: sampleStudent.kelompok || 'Kelompok 1',
                 antrian: '01',
+                wa: sampleStudent.wa || '6281234567801',
                 statusPeserta: 'CALON SISWA',
                 kegiatan: 'Observasi & Wawancara SPMB',
                 waktu: '06:45 WIB',
@@ -3721,13 +4270,29 @@ function jsonResponse(obj) {
             if (previewNotifEl) {
                 previewNotifEl.textContent = parseTemplateMessage(state.config.tplNotifHadir, sampleData);
             }
+            const previewTgEl = document.getElementById('live-preview-telegram');
+            const previewTgWaBtn = document.getElementById('live-preview-tg-wa-btn');
+            if (previewTgEl) {
+                const tgMsg = parseTemplateMessage(state.config.tplNotifTelegram, sampleData);
+                previewTgEl.textContent = tgMsg;
+                if (previewTgWaBtn) {
+                    const cleanPhone = formatWaNumber(sampleData.wa);
+                    previewTgWaBtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(tgMsg)}`;
+                    previewTgWaBtn.innerHTML = `<span>📲 Japri WA Wali Murid (${sampleData.panggilan})</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-sky-300"></i>`;
+                }
+            }
         }
 
         function updateLiveVoicePreview() {
             const previewVoiceEl = document.getElementById('live-preview-voice');
+            const previewPhoneticEl = document.getElementById('live-preview-phonetic');
             if (!previewVoiceEl) return;
             const sampleStudent = state.siswa.find(s => s.nisn === '0081234565') || state.siswa[0];
-            previewVoiceEl.textContent = `"${buildVoiceTextFromTemplate(sampleStudent)}"`;
+            const rawText = buildVoiceTextFromTemplate(sampleStudent);
+            previewVoiceEl.textContent = `"${rawText}"`;
+            if (previewPhoneticEl) {
+                previewPhoneticEl.textContent = `🎙️ Dibaca: "${normalizeIndonesianPhonetics(rawText)}"`;
+            }
         }
 
         function saveTemplateAndApiSettings() {
@@ -3735,15 +4300,23 @@ function jsonResponse(obj) {
             const provEl = document.getElementById('cfg-wa-provider');
             const tokEl = document.getElementById('cfg-wa-token');
             const autoWaEl = document.getElementById('cfg-auto-wa');
+            const tgTokEl = document.getElementById('cfg-tg-token');
+            const tgChatEl = document.getElementById('cfg-tg-chatid');
+            const autoTgEl = document.getElementById('cfg-auto-tg');
             const tplJapriEl = document.getElementById('tpl-japri-qr');
             const tplNotifEl = document.getElementById('tpl-notif-hadir');
+            const tplTgEl = document.getElementById('tpl-notif-telegram');
 
             if (gasEl) state.config.gasUrl = gasEl.value.trim();
             if (provEl) state.config.waProvider = provEl.value.trim();
             if (tokEl) state.config.waToken = tokEl.value.trim();
             if (autoWaEl) state.config.autoWaOnScan = autoWaEl.checked;
+            if (tgTokEl) state.config.tgBotToken = tgTokEl.value.trim();
+            if (tgChatEl) state.config.tgChatId = tgChatEl.value.trim();
+            if (autoTgEl) state.config.autoTgOnScan = autoTgEl.checked;
             if (tplJapriEl) state.config.tplJapriQr = tplJapriEl.value;
             if (tplNotifEl) state.config.tplNotifHadir = tplNotifEl.value;
+            if (tplTgEl) state.config.tplNotifTelegram = tplTgEl.value;
 
             updateGasConnectionBadges();
 
@@ -3756,7 +4329,7 @@ function jsonResponse(obj) {
             }
 
             saveStateToLocalStorage();
-            showToast('Pengaturan Koneksi GAS, Template WA & Provider berhasil disimpan!', 'success');
+            showToast('Pengaturan Koneksi GAS, Template WA & Template Telegram Bot berhasil disimpan!', 'success');
         }
 
         async function syncWithGAS() {
@@ -3847,17 +4420,35 @@ function jsonResponse(obj) {
                         }
                         if (cfgMap.TPL_JAPRI_QR) state.config.tplJapriQr = String(cfgMap.TPL_JAPRI_QR);
                         if (cfgMap.TPL_NOTIF_HADIR) state.config.tplNotifHadir = String(cfgMap.TPL_NOTIF_HADIR);
+                        if (cfgMap.TPL_NOTIF_TELEGRAM) state.config.tplNotifTelegram = String(cfgMap.TPL_NOTIF_TELEGRAM);
+                        if (cfgMap.TG_BOT_TOKEN !== undefined) state.config.tgBotToken = String(cfgMap.TG_BOT_TOKEN);
+                        if (cfgMap.TG_CHAT_ID !== undefined) state.config.tgChatId = String(cfgMap.TG_CHAT_ID);
+                        if (cfgMap.AUTO_SEND_TG !== undefined) {
+                            state.config.autoTgOnScan = String(cfgMap.AUTO_SEND_TG).toUpperCase() === 'TRUE';
+                        }
 
                         const passEl = document.getElementById('cfg-app-password');
                         const runTextEl = document.getElementById('cfg-running-text');
                         const runSpeedEl = document.getElementById('cfg-running-speed');
                         const provEl = document.getElementById('cfg-wa-provider');
                         const tokEl = document.getElementById('cfg-wa-token');
+                        const tgTokEl = document.getElementById('cfg-tg-token');
+                        const tgChatEl = document.getElementById('cfg-tg-chatid');
+                        const autoTgEl = document.getElementById('cfg-auto-tg');
+                        const tplJapriEl = document.getElementById('tpl-japri-qr');
+                        const tplNotifEl = document.getElementById('tpl-notif-hadir');
+                        const tplTgEl = document.getElementById('tpl-notif-telegram');
                         if (passEl) passEl.value = state.config.appPassword;
                         if (runTextEl) runTextEl.value = state.config.runningText;
                         if (runSpeedEl) runSpeedEl.value = state.config.runningSpeed;
                         if (provEl) provEl.value = state.config.waProvider;
                         if (tokEl) tokEl.value = state.config.waToken;
+                        if (tgTokEl) tgTokEl.value = state.config.tgBotToken;
+                        if (tgChatEl) tgChatEl.value = state.config.tgChatId;
+                        if (autoTgEl) autoTgEl.checked = state.config.autoTgOnScan;
+                        if (tplJapriEl) tplJapriEl.value = state.config.tplJapriQr;
+                        if (tplNotifEl) tplNotifEl.value = state.config.tplNotifHadir;
+                        if (tplTgEl) tplTgEl.value = state.config.tplNotifTelegram;
                     }
                     if (Array.isArray(data.logs)) {
                         state.logs = data.logs.slice().reverse().map(r => {
@@ -3955,7 +4546,11 @@ function jsonResponse(obj) {
                 sendWa: state.config.autoWaOnScan,
                 waProvider: state.config.waProvider,
                 waToken: state.config.waToken,
-                waMessage: logItem.waMessage
+                sendTg: state.config.autoTgOnScan,
+                tgToken: state.config.tgBotToken,
+                tgChatId: state.config.tgChatId,
+                waMessage: logItem.waMessage,
+                tgMessage: logItem.tgMessage || logItem.waMessage
             };
 
             try {
