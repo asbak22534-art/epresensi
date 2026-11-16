@@ -1046,16 +1046,53 @@
                                     <option value="hybrid_natural">🌟 Hybrid Neural Indonesia (Huruf 'R' Jelas & Natural)</option>
                                     <option value="web_speech">🔊 Web Speech Browser Lokal (Fonetik Teroptimasi)</option>
                                 </select>
-                            </div>
-                            <div class="flex flex-col justify-center gap-1.5 pt-1">
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-800">
+                                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 mt-2">
                                     <input type="checkbox" id="cfg-voice-phonetic" checked onchange="toggleVoicePhoneticOption()" class="w-4 h-4 rounded text-indigo-600">
                                     <span>Optimasi Artikulasi 'R' & Ejaan Angka</span>
                                 </label>
-                                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-800">
-                                    <input type="checkbox" id="cfg-voice-chime" checked onchange="toggleVoicePhoneticOption()" class="w-4 h-4 rounded text-indigo-600">
-                                    <span>Nada Pembuka "Ting-Tong" Halus</span>
-                                </label>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <label class="block text-xs font-bold text-indigo-950">Nada Pembuka Sambutan (Chime):</label>
+                                    <button type="button" onclick="previewChimeOnly()" class="px-2 py-0.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer shadow-2xs" title="Dengarkan nada pembuka yang dipilih">
+                                        <i class="fa-solid fa-music text-[9px]"></i> Putar Nada
+                                    </button>
+                                </div>
+                                <select id="cfg-voice-chime-style" onchange="changeVoiceChimeStyle(this.value)" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-bold text-slate-800 bg-white focus:outline-none">
+                                    <optgroup label="✅ Konfirmasi Absensi Berhasil (Smart Gate)">
+                                        <option value="absen_sukses_modern">✅ Absensi Berhasil Modern (Smart Gate - Segar & Tegas)</option>
+                                        <option value="absen_verifikasi_cepat">⚡ Verifikasi Presensi Cepat (2 Nada Positif - Hemat Waktu)</option>
+                                        <option value="absen_harmoni_sukses">🌟 Harmoni Presensi Sukses (3 Nada Naik Ceria & Ramah)</option>
+                                        <option value="absen_kristal_jernih">💎 Denting Konfirmasi Jernih (1 Nada Kristal Lembut)</option>
+                                    </optgroup>
+                                    <optgroup label="🚪 Bel Pintu Warm & Smooth (Halus & Ramah Tamu)">
+                                        <option value="bell_warm_dingdong">🚪 Bel Pintu Warm Acoustic (Ding-Dong Empuk & Hangat)</option>
+                                        <option value="bell_smart_ring">🏡 Smart Doorbell Modern (Gaya Ring/Nest Halus Berkelas)</option>
+                                        <option value="bell_rhodes_lounge">☕ Bel Pintu Cafe / Boutique Lounge (Warm Electric Piano)</option>
+                                        <option value="bell_zen_wood">🎍 Bel Pintu Kayu & Bamboo Zen (Marimba Lembut & Tenang)</option>
+                                        <option value="bell_double_chime">🔔 Bel Pintu Harmoni Ganda (Soft Double Chime Ramah)</option>
+                                        <option value="bell_westminster_warm">🕰️ Bel Pintu Westminster Warm (4 Nada Klasik Halus)</option>
+                                    </optgroup>
+                                    <optgroup label="💬 Notifikasi Sosial Media Populer">
+                                        <option value="soc_whatsapp_pop">💚 Gaya WhatsApp Modern (Warm Pop & Smooth Whistle)</option>
+                                        <option value="soc_telegram_ding">✈️ Gaya Telegram Bot (Paperplane Double-Tap Ding)</option>
+                                        <option value="soc_ios_tritone">📱 Gaya iMessage / iOS Tri-Tone (3 Nada Ikonik Jernih)</option>
+                                        <option value="soc_messenger_ping">💙 Gaya Messenger Bubble (Pop Halus & Denting Naik)</option>
+                                        <option value="soc_line_melody">🎵 Gaya LINE Signature (4 Nada Ceria & Akrab)</option>
+                                    </optgroup>
+                                    <optgroup label="✈️ Pengumuman Bandara & Aula Eksekutif">
+                                        <option value="chime_airport">✈️ Bandara Internasional (4 Nada Naik - Formal & Megah)</option>
+                                        <option value="lobby_hotel">🏨 Grand Lobby Executive (3 Nada Triad - Hangat & Ramah)</option>
+                                        <option value="crystal_harp">✨ Crystal Harp Glissando (5 Nada Lembut - Modern & Elegan)</option>
+                                        <option value="shinkansen_melody">🎋 Melodi Sambutan Sekolah (4 Nada Ceria & Bersahabat)</option>
+                                        <option value="royal_gong">🔔 Warm Tubular Bell (2 Nada Dalam - Wibawa & Tenang)</option>
+                                        <option value="ding_dong">🔊 Ting-Tong Klasik (2 Nada Standar Halus)</option>
+                                    </optgroup>
+                                    <optgroup label="🔇 Tanpa Nada">
+                                        <option value="none">🔇 Tanpa Nada Pembuka (Langsung Suara Sapaan)</option>
+                                    </optgroup>
+                                </select>
+                                <p class="text-[10px] text-indigo-900/70 mt-1">Pilih karakter nada (Absensi, Bel Pintu Warm, Sosmed, atau Bandara) sebelum suara menyapa.</p>
                             </div>
                         </div>
 
@@ -2059,6 +2096,7 @@ function jsonResponse(obj) {
                 voiceEngine: 'hybrid_natural',
                 voicePhoneticR: true,
                 voiceChime: true,
+                voiceChimeStyle: 'absen_sukses_modern',
                 voiceRate: 0.95,
                 voicePitch: 1.0,
                 selectedVoiceURI: '',
@@ -2259,7 +2297,7 @@ function jsonResponse(obj) {
                 const runSpeedEl = document.getElementById('cfg-running-speed');
                 const voiceEngEl = document.getElementById('cfg-voice-engine');
                 const voicePhonEl = document.getElementById('cfg-voice-phonetic');
-                const voiceChimeEl = document.getElementById('cfg-voice-chime');
+                const voiceChimeStyleEl = document.getElementById('cfg-voice-chime-style');
                 const voiceRateEl = document.getElementById('cfg-voice-rate-slider');
                 const voicePitchEl = document.getElementById('cfg-voice-pitch-slider');
 
@@ -2280,7 +2318,10 @@ function jsonResponse(obj) {
                 if (runSpeedEl && state.config.runningSpeed) runSpeedEl.value = state.config.runningSpeed;
                 if (voiceEngEl && state.config.voiceEngine) voiceEngEl.value = state.config.voiceEngine;
                 if (voicePhonEl) voicePhonEl.checked = state.config.voicePhoneticR !== false;
-                if (voiceChimeEl) voiceChimeEl.checked = state.config.voiceChime !== false;
+                if (voiceChimeStyleEl) {
+                    const savedStyle = state.config.voiceChime === false ? 'none' : (state.config.voiceChimeStyle || 'absen_sukses_modern');
+                    voiceChimeStyleEl.value = savedStyle;
+                }
                 if (voiceRateEl && state.config.voiceRate) voiceRateEl.value = state.config.voiceRate;
                 if (voicePitchEl && state.config.voicePitch) voicePitchEl.value = state.config.voicePitch;
 
@@ -2667,77 +2708,44 @@ function jsonResponse(obj) {
             return parts[0];
         }
 
-        function angkaKeKataIndonesia(numInput) {
-            const n = parseInt(String(numInput).replace(/[^0-9]/g, ''), 10);
-            if (isNaN(n) || n <= 0) return String(numInput);
+        function numberToIndonesianWords(num) {
+            const n = parseInt(num, 10);
+            if (isNaN(n) || n <= 0) return String(num);
             const satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
             if (n < 12) return satuan[n];
-            if (n < 20) return angkaKeKataIndonesia(n - 10) + ' belas';
+            if (n < 20) return satuan[n - 10] + ' belas';
             if (n < 100) {
                 const puluh = Math.floor(n / 10);
                 const sisa = n % 10;
                 return satuan[puluh] + ' puluh' + (sisa > 0 ? ' ' + satuan[sisa] : '');
             }
-            if (n < 200) return 'seratus' + (n - 100 > 0 ? ' ' + angkaKeKataIndonesia(n - 100) : '');
-            if (n < 1000) {
-                const ratus = Math.floor(n / 100);
-                const sisa = n % 100;
-                return satuan[ratus] + ' ratus' + (sisa > 0 ? ' ' + angkaKeKataIndonesia(sisa) : '');
-            }
+            if (n === 100) return 'seratus';
+            if (n < 200) return 'seratus ' + numberToIndonesianWords(n - 100);
             return String(n);
+        }
+
+        function normalizeIndonesianPhonetics(rawText) {
+            let text = String(rawText || '').trim();
+            if (state.config.voicePhoneticR === false) {
+                return text;
+            }
+            text = text.replace(/#\s*0*(\d+)/g, (_, d) => numberToIndonesianWords(d));
+            text = text.replace(/\b(antrian|antrean|nomor|kelompok|ruang|ruangan)\s+0*(\d+)\b/gi, (match, label, digits) => {
+                return `${label} ${numberToIndonesianWords(digits)}`;
+            });
+            text = text.replace(/\b0([1-9])\b/g, (_, d) => numberToIndonesianWords(d));
+            text = text.replace(/,\s*/g, ', ');
+            if (!/[.!?]$/.test(text)) text += '.';
+            return text;
         }
 
         let cachedIndonesianVoice = null;
         let currentCloudAudio = null;
 
-        /**
-         * NORMALISASI EJAAN LISAN & LOGAT NATURAL BAHASA INDONESIA
-         * Menjaga ejaan kata "antrian" tetap alami dan mengubah angka "01" menjadi "satu"
-         * agar diucapkan dengan logat penutur asli Indonesia yang luwes.
-         */
-        function normalizeIndonesianPhonetics(rawText) {
-            let text = String(rawText || '').trim();
-            if (!text) return '';
-
-            // Pastikan tidak ada ejaan "antre-an" yang tersisa
-            text = text.replace(/\bantre-an\b/gi, 'antrian');
-
-            if (state.config.voicePhoneticR === false) {
-                return text.replace(/,\s*/g, ', ');
-            }
-
-            // 1. Ubah "Kelompok 1" -> "Kelompok satu", "Ruang 2" -> "Ruang dua"
-            text = text.replace(/\b(kelompok|ruang|ruangan|loket|meja)\s+0*([1-9][0-9]*)\b/gi, (_, prefix, num) => {
-                return `${prefix} ${angkaKeKataIndonesia(num)}`;
-            });
-
-            // 2. Ubah "nomor antrian 01" atau "antrian #01" -> "nomor antrian satu" (tetap mengeja "antrian" secara natural)
-            text = text.replace(/\b(nomor\s+antrian|antrian|nomor)\s*#?\s*0*([1-9][0-9]*)\b/gi, (_, label, num) => {
-                const cleanLabel = label.replace(/\s+/g, ' ').trim();
-                return `${cleanLabel} ${angkaKeKataIndonesia(num)}`;
-            });
-
-            // 3. Jika ada angka berawalan nol yang berdiri sendiri seperti "#01" atau "01" -> "satu"
-            text = text.replace(/#?0+([1-9][0-9]*)\b/g, (_, num) => angkaKeKataIndonesia(num));
-
-            // 4. Rapikan spasi dan tanda baca agar intonasi jeda terdengar ramah & mengalir
-            text = text
-                .replace(/,\s*/g, ', ')
-                .replace(/\s{2,}/g, ' ')
-                .trim();
-
-            if (!/[.!?]$/.test(text)) {
-                text += '.';
-            }
-            return text;
-        }
-
-        /**
-         * NADA PEMBUKA "TING-TONG" HALUS ALA BANDARA SEBELUM SUARA SAPAAN
-         */
-        function playSoftAnnouncementChime() {
+        function playSoftAnnouncementChime(overrideStyle) {
             return new Promise((resolve) => {
-                if (state.config.voiceChime === false) {
+                const style = overrideStyle || state.config.voiceChimeStyle || 'absen_sukses_modern';
+                if (state.config.voiceChime === false || style === 'none') {
                     resolve();
                     return;
                 }
@@ -2749,28 +2757,283 @@ function jsonResponse(obj) {
                         audioCtx.resume();
                     }
                     const now = audioCtx.currentTime;
-                    // Nada Ding (G5 - 783.99Hz) -> Dong (E5 - 659.25Hz)
-                    const notes = [
-                        { freq: 783.99, start: 0, dur: 0.28 },
-                        { freq: 659.25, start: 0.22, dur: 0.42 }
-                    ];
-                    notes.forEach(n => {
-                        const osc = audioCtx.createOscillator();
-                        const gain = audioCtx.createGain();
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(n.freq, now + n.start);
-                        gain.gain.setValueAtTime(0.08, now + n.start);
-                        gain.gain.exponentialRampToValueAtTime(0.001, now + n.start + n.dur);
-                        osc.connect(gain);
-                        gain.connect(audioCtx.destination);
-                        osc.start(now + n.start);
-                        osc.stop(now + n.start + n.dur);
+
+                    // Preset urutan nada harmonis untuk konfirmasi absensi berhasil, bel pintu warm, sosmed & sambutan
+                    const chimePresets = {
+                        // === KATEGORI 1: KONFIRMASI ABSENSI BERHASIL ===
+                        absen_sukses_modern: {
+                            waitMs: 540,
+                            notes: [
+                                { freq: 523.25, start: 0.00, dur: 0.24, gain: 0.085 },
+                                { freq: 659.25, start: 0.09, dur: 0.26, gain: 0.090 },
+                                { freq: 783.99, start: 0.18, dur: 0.30, gain: 0.095 },
+                                { freq: 1046.50, start: 0.27, dur: 0.52, gain: 0.105 }
+                            ]
+                        },
+                        absen_verifikasi_cepat: {
+                            waitMs: 400,
+                            notes: [
+                                { freq: 659.25, start: 0.00, dur: 0.22, gain: 0.090 },
+                                { freq: 987.77, start: 0.11, dur: 0.44, gain: 0.105 }
+                            ]
+                        },
+                        absen_harmoni_sukses: {
+                            waitMs: 480,
+                            notes: [
+                                { freq: 698.46, start: 0.00, dur: 0.26, gain: 0.085 },
+                                { freq: 880.00, start: 0.11, dur: 0.28, gain: 0.090 },
+                                { freq: 1046.50, start: 0.22, dur: 0.50, gain: 0.100 }
+                            ]
+                        },
+                        absen_kristal_jernih: {
+                            waitMs: 360,
+                            notes: [
+                                { freq: 880.00, start: 0.00, dur: 0.45, gain: 0.095 },
+                                { freq: 1318.51, start: 0.04, dur: 0.48, gain: 0.065 }
+                            ]
+                        },
+
+                        // === KATEGORI 2: BEL PINTU WARM & SMOOTH (HALUS & EMPUK) ===
+                        // 1. Bel Pintu Warm Acoustic Ding-Dong (F5 -> D5 dengan ekor resonansi hangat)
+                        bell_warm_dingdong: {
+                            waitMs: 680,
+                            warmCutoff: 1800,
+                            notes: [
+                                { freq: 698.46, start: 0.00, dur: 0.55, gain: 0.105, attack: 0.028 },
+                                { freq: 349.23, start: 0.00, dur: 0.50, gain: 0.055, attack: 0.028 },
+                                { freq: 587.33, start: 0.28, dur: 0.78, gain: 0.110, attack: 0.032 },
+                                { freq: 293.66, start: 0.28, dur: 0.72, gain: 0.060, attack: 0.032 }
+                            ]
+                        },
+                        // 2. Smart Doorbell Modern (Gaya Ring/Nest: Harmoni Major 9th lembut)
+                        bell_smart_ring: {
+                            waitMs: 640,
+                            warmCutoff: 2100,
+                            notes: [
+                                { freq: 523.25, start: 0.00, dur: 0.48, gain: 0.085, attack: 0.025 },
+                                { freq: 659.25, start: 0.07, dur: 0.50, gain: 0.085, attack: 0.025 },
+                                { freq: 783.99, start: 0.14, dur: 0.55, gain: 0.090, attack: 0.025 },
+                                { freq: 1174.66, start: 0.21, dur: 0.68, gain: 0.075, attack: 0.030 }
+                            ]
+                        },
+                        // 3. Bel Pintu Cafe / Boutique Lounge (Warm Electric Piano Major 7th Chord)
+                        bell_rhodes_lounge: {
+                            waitMs: 680,
+                            warmCutoff: 1650,
+                            notes: [
+                                { freq: 349.23, start: 0.00, dur: 0.65, gain: 0.080, attack: 0.030 },
+                                { freq: 440.00, start: 0.10, dur: 0.62, gain: 0.080, attack: 0.030 },
+                                { freq: 523.25, start: 0.20, dur: 0.60, gain: 0.085, attack: 0.030 },
+                                { freq: 659.25, start: 0.30, dur: 0.72, gain: 0.090, attack: 0.032 }
+                            ]
+                        },
+                        // 4. Bel Pintu Kayu & Bamboo Zen (Marimba Kayu Hangat & Sangat Halus)
+                        bell_zen_wood: {
+                            waitMs: 600,
+                            warmCutoff: 1500,
+                            notes: [
+                                { freq: 392.00, start: 0.00, dur: 0.34, gain: 0.100, attack: 0.022 },
+                                { freq: 440.00, start: 0.13, dur: 0.36, gain: 0.100, attack: 0.022 },
+                                { freq: 587.33, start: 0.26, dur: 0.58, gain: 0.105, attack: 0.025 }
+                            ]
+                        },
+                        // 5. Bel Pintu Harmoni Ganda (Soft Double Chime: Kord A Mayor -> D Mayor)
+                        bell_double_chime: {
+                            waitMs: 650,
+                            warmCutoff: 1900,
+                            notes: [
+                                { freq: 440.00, start: 0.00, dur: 0.45, gain: 0.080, attack: 0.026 },
+                                { freq: 659.25, start: 0.00, dur: 0.45, gain: 0.085, attack: 0.026 },
+                                { freq: 369.99, start: 0.25, dur: 0.68, gain: 0.080, attack: 0.030 },
+                                { freq: 587.33, start: 0.25, dur: 0.68, gain: 0.090, attack: 0.030 }
+                            ]
+                        },
+                        // 6. Bel Pintu Westminster Warm (4 Nada Klasik Halus & Tidak Menusuk)
+                        bell_westminster_warm: {
+                            waitMs: 820,
+                            warmCutoff: 1750,
+                            notes: [
+                                { freq: 493.88, start: 0.00, dur: 0.38, gain: 0.085, attack: 0.026 },
+                                { freq: 440.00, start: 0.18, dur: 0.38, gain: 0.085, attack: 0.026 },
+                                { freq: 392.00, start: 0.36, dur: 0.40, gain: 0.085, attack: 0.026 },
+                                { freq: 293.66, start: 0.54, dur: 0.68, gain: 0.095, attack: 0.030 }
+                            ]
+                        },
+
+                        // === KATEGORI 3: NOTIFIKASI SOSIAL MEDIA POPULER ===
+                        // 1. Gaya WhatsApp Modern (Warm Bubble Pop + Smooth Upward Whistle)
+                        soc_whatsapp_pop: {
+                            waitMs: 460,
+                            warmCutoff: 2600,
+                            notes: [
+                                { freq: 380.00, freqEnd: 587.33, start: 0.00, dur: 0.11, gain: 0.095, attack: 0.008 },
+                                { freq: 587.33, freqEnd: 880.00, start: 0.09, dur: 0.14, gain: 0.095, attack: 0.010 },
+                                { freq: 880.00, freqEnd: 1174.66, start: 0.19, dur: 0.30, gain: 0.105, attack: 0.012 }
+                            ]
+                        },
+                        // 2. Gaya Telegram Bot (Paperplane Double-Tap Ding: G5 -> D6)
+                        soc_telegram_ding: {
+                            waitMs: 420,
+                            warmCutoff: 2800,
+                            notes: [
+                                { freq: 783.99, start: 0.00, dur: 0.16, gain: 0.095, attack: 0.008 },
+                                { freq: 1174.66, start: 0.10, dur: 0.36, gain: 0.105, attack: 0.010 }
+                            ]
+                        },
+                        // 3. Gaya iMessage / iOS Tri-Tone (3 Nada Marimba Kristal Ikonik: B5 - D#6 - G#6)
+                        soc_ios_tritone: {
+                            waitMs: 480,
+                            warmCutoff: 2700,
+                            notes: [
+                                { freq: 783.99, start: 0.00, dur: 0.20, gain: 0.095, attack: 0.010 },
+                                { freq: 987.77, start: 0.11, dur: 0.22, gain: 0.095, attack: 0.010 },
+                                { freq: 1318.51, start: 0.22, dur: 0.38, gain: 0.105, attack: 0.010 }
+                            ]
+                        },
+                        // 4. Gaya Messenger Bubble (Bubble Pop Glide + High Bell Ping)
+                        soc_messenger_ping: {
+                            waitMs: 440,
+                            warmCutoff: 2500,
+                            notes: [
+                                { freq: 320.00, freqEnd: 659.25, start: 0.00, dur: 0.12, gain: 0.095, attack: 0.008 },
+                                { freq: 987.77, start: 0.11, dur: 0.38, gain: 0.105, attack: 0.012 }
+                            ]
+                        },
+                        // 5. Gaya LINE Signature (4 Nada Ceria & Bersahabat)
+                        soc_line_melody: {
+                            waitMs: 520,
+                            warmCutoff: 2500,
+                            notes: [
+                                { freq: 659.25, start: 0.00, dur: 0.15, gain: 0.085, attack: 0.010 },
+                                { freq: 783.99, start: 0.09, dur: 0.15, gain: 0.090, attack: 0.010 },
+                                { freq: 880.00, start: 0.18, dur: 0.16, gain: 0.090, attack: 0.010 },
+                                { freq: 1046.50, start: 0.27, dur: 0.36, gain: 0.100, attack: 0.012 }
+                            ]
+                        },
+
+                        // === KATEGORI 4: PENGUMUMAN BANDARA & AULA EKSEKUTIF ===
+                        chime_airport: {
+                            waitMs: 780,
+                            notes: [
+                                { freq: 349.23, start: 0.00, dur: 0.45, gain: 0.085 },
+                                { freq: 440.00, start: 0.16, dur: 0.45, gain: 0.085 },
+                                { freq: 523.25, start: 0.32, dur: 0.50, gain: 0.090 },
+                                { freq: 698.46, start: 0.48, dur: 0.75, gain: 0.095 }
+                            ]
+                        },
+                        lobby_hotel: {
+                            waitMs: 640,
+                            notes: [
+                                { freq: 587.33, start: 0.00, dur: 0.45, gain: 0.085 },
+                                { freq: 739.99, start: 0.16, dur: 0.48, gain: 0.085 },
+                                { freq: 880.00, start: 0.32, dur: 0.72, gain: 0.095 }
+                            ]
+                        },
+                        crystal_harp: {
+                            waitMs: 700,
+                            notes: [
+                                { freq: 523.25, start: 0.00, dur: 0.38, gain: 0.065 },
+                                { freq: 587.33, start: 0.09, dur: 0.38, gain: 0.070 },
+                                { freq: 659.25, start: 0.18, dur: 0.42, gain: 0.075 },
+                                { freq: 783.99, start: 0.27, dur: 0.48, gain: 0.080 },
+                                { freq: 1046.50, start: 0.36, dur: 0.70, gain: 0.085 }
+                            ]
+                        },
+                        shinkansen_melody: {
+                            waitMs: 740,
+                            notes: [
+                                { freq: 392.00, start: 0.00, dur: 0.36, gain: 0.085 },
+                                { freq: 493.88, start: 0.14, dur: 0.36, gain: 0.085 },
+                                { freq: 587.33, start: 0.28, dur: 0.40, gain: 0.090 },
+                                { freq: 783.99, start: 0.42, dur: 0.70, gain: 0.095 }
+                            ]
+                        },
+                        royal_gong: {
+                            waitMs: 660,
+                            notes: [
+                                { freq: 392.00, start: 0.00, dur: 0.50, gain: 0.095 },
+                                { freq: 523.25, start: 0.24, dur: 0.75, gain: 0.100 }
+                            ]
+                        },
+                        ding_dong: {
+                            waitMs: 520,
+                            notes: [
+                                { freq: 783.99, start: 0.00, dur: 0.34, gain: 0.085 },
+                                { freq: 659.25, start: 0.22, dur: 0.50, gain: 0.085 }
+                            ]
+                        }
+                    };
+
+                    const preset = chimePresets[style] || chimePresets.absen_sukses_modern;
+
+                    // Warm Low-Pass Filter agar bel pintu & chime terdengar empuk, hangat, dan tidak tajam
+                    const warmFilter = audioCtx.createBiquadFilter();
+                    warmFilter.type = 'lowpass';
+                    warmFilter.frequency.setValueAtTime(preset.warmCutoff || 2400, now);
+                    warmFilter.Q.setValueAtTime(0.7, now);
+                    warmFilter.connect(audioCtx.destination);
+
+                    preset.notes.forEach(n => {
+                        const attackTime = n.attack || 0.018;
+
+                        // Fundamental tone (Sine)
+                        const osc1 = audioCtx.createOscillator();
+                        const gain1 = audioCtx.createGain();
+                        osc1.type = 'sine';
+                        osc1.frequency.setValueAtTime(n.freq, now + n.start);
+                        if (n.freqEnd) {
+                            osc1.frequency.exponentialRampToValueAtTime(n.freqEnd, now + n.start + (n.dur * 0.75));
+                        }
+
+                        gain1.gain.setValueAtTime(0.0001, now + n.start);
+                        gain1.gain.linearRampToValueAtTime(n.gain, now + n.start + attackTime);
+                        gain1.gain.exponentialRampToValueAtTime(0.0001, now + n.start + n.dur);
+
+                        osc1.connect(gain1);
+                        gain1.connect(warmFilter);
+                        osc1.start(now + n.start);
+                        osc1.stop(now + n.start + n.dur + 0.03);
+
+                        // Soft harmonic bell overtone (2x frequency)
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.type = 'triangle';
+                        osc2.frequency.setValueAtTime((n.freqEnd || n.freq) * 2, now + n.start);
+
+                        gain2.gain.setValueAtTime(0.0001, now + n.start);
+                        gain2.gain.linearRampToValueAtTime(n.gain * 0.18, now + n.start + (attackTime * 0.8));
+                        gain2.gain.exponentialRampToValueAtTime(0.0001, now + n.start + (n.dur * 0.6));
+
+                        osc2.connect(gain2);
+                        gain2.connect(warmFilter);
+                        osc2.start(now + n.start);
+                        osc2.stop(now + n.start + (n.dur * 0.6) + 0.03);
                     });
-                    setTimeout(resolve, 480);
+
+                    setTimeout(resolve, preset.waitMs);
                 } catch (e) {
                     resolve();
                 }
             });
+        }
+
+        function changeVoiceChimeStyle(styleVal) {
+            state.config.voiceChimeStyle = styleVal || 'absen_sukses_modern';
+            state.config.voiceChime = styleVal !== 'none';
+            saveStateToLocalStorage();
+            if (styleVal !== 'none') {
+                playSoftAnnouncementChime(styleVal);
+            }
+        }
+
+        function previewChimeOnly() {
+            const styleEl = document.getElementById('cfg-voice-chime-style');
+            const selected = (styleEl && styleEl.value) || state.config.voiceChimeStyle || 'absen_sukses_modern';
+            if (selected === 'none') {
+                showToast('Nada pembuka sedang dinonaktifkan. Pilih salah satu nada untuk mendengarkan.', 'info');
+                return;
+            }
+            playSoftAnnouncementChime(selected);
         }
 
         function loadAndSelectIndonesianVoice() {
@@ -2941,9 +3204,12 @@ function jsonResponse(obj) {
 
         function toggleVoicePhoneticOption() {
             const phonEl = document.getElementById('cfg-voice-phonetic');
-            const chimeEl = document.getElementById('cfg-voice-chime');
+            const chimeStyleEl = document.getElementById('cfg-voice-chime-style');
             if (phonEl) state.config.voicePhoneticR = phonEl.checked;
-            if (chimeEl) state.config.voiceChime = chimeEl.checked;
+            if (chimeStyleEl) {
+                state.config.voiceChimeStyle = chimeStyleEl.value;
+                state.config.voiceChime = chimeStyleEl.value !== 'none';
+            }
             updateLiveVoicePreview();
             saveStateToLocalStorage();
         }
@@ -3955,7 +4221,10 @@ function jsonResponse(obj) {
             if (isDuplicate) {
                 playNotificationSound('duplicate');
             } else {
-                playNotificationSound('success');
+                // Jika nada pembuka chime aktif, biarkan chime yang berbunyi jernih tanpa bertumpuk dengan beep standar
+                if (state.config.voiceChime === false || state.config.voiceChimeStyle === 'none') {
+                    playNotificationSound('success');
+                }
                 speakWelcomeAttendance(studentObj || logItem, logItem);
                 triggerCongratulationStars();
             }
