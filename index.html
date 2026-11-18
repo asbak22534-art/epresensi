@@ -2729,6 +2729,7 @@ function jsonResponse(obj) {
             canvas.width = 640;
             canvas.height = 800;
 
+            // 1. Background Luar (Dark Indigo Gradient)
             const bgGrad = ctx.createLinearGradient(0, 0, 640, 800);
             bgGrad.addColorStop(0, '#1e1b4b');
             bgGrad.addColorStop(0.5, '#312e81');
@@ -2736,24 +2737,45 @@ function jsonResponse(obj) {
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // 2. Kartu Utama Putih
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.roundRect(40, 40, 560, 720, 32);
             ctx.fill();
 
-            const headerGrad = ctx.createLinearGradient(40, 40, 600, 175);
-            headerGrad.addColorStop(0, '#4f46e5');
-            headerGrad.addColorStop(1, '#7c3aed');
+            // 3. Header Kartu (Gradient Biru-Ungu + Teks Judul Rata Tengah)
+            const headerGrad = ctx.createLinearGradient(40, 40, 600, 180);
+            headerGrad.addColorStop(0, '#3b82f6');
+            headerGrad.addColorStop(0.5, '#4f46e5');
+            headerGrad.addColorStop(1, '#6d28d9');
             ctx.fillStyle = headerGrad;
             ctx.beginPath();
-            ctx.roundRect(40, 40, 560, 135, [32, 32, 0, 0]);
+            ctx.roundRect(40, 40, 560, 140, [32, 32, 0, 0]);
             ctx.fill();
 
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            ctx.fillStyle = '#fde68a';
+            ctx.font = 'bold 13px Inter, Arial, sans-serif';
+            ctx.fillText('MI ISLAM TERPADU AL-USWAH PASIRIAN', 320, 76);
+
             ctx.fillStyle = '#ffffff';
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.font = '800 24px Inter, Arial, sans-serif';
+            ctx.fillText('KARTU QR PRESENSI SEKOLAH', 320, 110);
+
+            const badgeRole = String(student.statusPeserta || 'CALON SISWA').toUpperCase();
+            const kelompokLabel = String(student.kelompok || 'Kelompok 1').toUpperCase();
+            ctx.fillStyle = '#e0f2fe';
+            ctx.font = 'bold 15px Inter, Arial, sans-serif';
+            ctx.fillText(`${badgeRole}  •  ${kelompokLabel}`, 320, 146);
+
+            // 4. Kotak Bingkai QR Code (Tengah Simetris)
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#cbd5e1';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.roundRect(140, 205, 360, 360, 24);
+            ctx.roundRect(145, 205, 350, 350, 24);
             ctx.fill();
             ctx.stroke();
 
@@ -2762,32 +2784,52 @@ function jsonResponse(obj) {
                 new QRious({
                     element: qrCanvas,
                     value: String(student.nisn).trim(),
-                    size: 320,
+                    size: 310,
                     level: 'M',
                     background: '#ffffff',
                     foreground: '#000000',
-                    padding: 22
+                    padding: 18
                 });
-                ctx.drawImage(qrCanvas, 160, 225, 320, 320);
+                ctx.drawImage(qrCanvas, 165, 225, 310, 310);
             }
 
+            // 5. Informasi Identitas Siswa (Rata Tengah Presisi & Anti-Potong)
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const rawName = String(student.nama || 'Nama Siswa').trim();
+            let nameFontSize = 26;
+            ctx.font = `800 ${nameFontSize}px Inter, Arial, sans-serif`;
+            while (ctx.measureText(rawName).width > 490 && nameFontSize > 17) {
+                nameFontSize -= 1;
+                ctx.font = `800 ${nameFontSize}px Inter, Arial, sans-serif`;
+            }
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 26px Inter, Arial, sans-serif';
-            const cleanName = student.nama.length > 28 ? student.nama.substring(0, 26) + '...' : student.nama;
-            ctx.fillText(cleanName, 320, 620);
+            ctx.fillText(rawName, 320, 598, 500);
 
             const panggilan = student.panggilan || formatNamaPanggilan(student);
+            const infoSubText = `Panggilan: ${panggilan}  •  ${student.kelompok || 'Kelompok 1'}`;
             ctx.fillStyle = '#059669';
-            ctx.font = 'bold 19px Inter, Arial, sans-serif';
-            ctx.fillText(`Panggilan: ${panggilan} • ${student.kelompok || 'Kelompok 1'}`, 320, 656);
+            ctx.font = 'bold 18px Inter, Arial, sans-serif';
+            ctx.fillText(infoSubText, 320, 636, 500);
 
-            ctx.fillStyle = '#334155';
-            ctx.font = 'bold 22px monospace';
-            ctx.fillText(`NISN: ${student.nisn}`, 320, 698);
+            // Pill Kotak NISN di Tengah
+            ctx.fillStyle = '#f1f5f9';
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(170, 662, 300, 44, 14);
+            ctx.fill();
+            ctx.stroke();
 
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '14px Inter, Arial, sans-serif';
-            ctx.fillText('Tunjukkan QR Code ini ke kamera pemindai saat kegiatan berlangsung', 320, 736);
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 21px "JetBrains Mono", monospace';
+            ctx.fillText(`NISN: ${student.nisn}`, 320, 685, 280);
+
+            // Petunjuk Bawah Rata Tengah
+            ctx.fillStyle = '#64748b';
+            ctx.font = '500 13px Inter, Arial, sans-serif';
+            ctx.fillText('Tunjukkan QR Code ini ke kamera pemindai saat kegiatan berlangsung', 320, 732, 500);
 
             return canvas;
         }
