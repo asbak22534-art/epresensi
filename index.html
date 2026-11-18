@@ -84,10 +84,13 @@
             object-fit: cover !important;
             border-radius: 0 !important;
             opacity: 0;
-            transition: opacity 0.35s ease-in-out;
+            transition: opacity 0.35s ease-in-out, transform 0.25s ease;
         }
         #qr-reader.video-ready video {
             opacity: 1;
+        }
+        #qr-reader.camera-mirrored video {
+            transform: scaleX(-1) !important;
         }
         #qr-reader__scan_region img,
         #qr-reader__ScanRegionHighlighter,
@@ -592,9 +595,19 @@
                             </div>
 
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[11px] font-semibold text-emerald-300">
+                                <span id="camera-active-label" class="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[11px] font-semibold text-emerald-300">
                                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Siap Memindai
                                 </span>
+
+                                <button type="button" id="btn-switch-camera" onclick="switchCameraDevice(event)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-bold text-sky-200 transition-all cursor-pointer" title="Ganti Kamera Depan / Belakang / Webcam USB">
+                                    <i class="fa-solid fa-camera-rotate"></i>
+                                    <span id="switch-camera-label">Depan/Belakang</span>
+                                </button>
+
+                                <button type="button" id="btn-mirror-camera" onclick="toggleCameraMirror(event)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-bold text-amber-200 transition-all cursor-pointer" title="Balik Arah Kiri-Kanan Kamera (Mirror Mode untuk Kamera Laptop)">
+                                    <i class="fa-solid fa-left-right"></i>
+                                    <span id="mirror-camera-label">Mirror: ON</span>
+                                </button>
 
                                 <button type="button" onclick="switchTab('notifikasi')" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-bold text-amber-200 cursor-pointer" title="Atur Durasi Kartu Notifikasi">
                                     <i class="fa-solid fa-sliders mr-1"></i><span id="scanner-notif-duration-badge">Notif: 2.5d</span>
@@ -2275,6 +2288,12 @@ function jsonResponse(obj) {
             activeEventId: 'KEG-001',
             cameraActive: false,
             html5QrCode: null,
+            availableCameras: [],
+            currentCameraIndex: 0,
+            facingModePref: 'environment',
+            cameraMirrored: false,
+            parallelScanTimer: null,
+            japriSentMap: {},
             isScanningCooldown: false,
             isAuthenticated: false,
             isGasSyncedOnce: false,
@@ -2285,7 +2304,7 @@ function jsonResponse(obj) {
                 runningSpeed: 22,
                 gasUrl: DEFAULT_GAS_WEBAPP_URL,
                 productionMode: false,
-                includeQrUrlInWaText: true,
+                includeQrUrlInWaText: false,
                 waProvider: '',
                 waToken: '',
                 autoWaOnScan: true,
@@ -2301,7 +2320,7 @@ function jsonResponse(obj) {
                 voicePitch: 1.0,
                 selectedVoiceURI: '',
                 tplVoiceText: `Selamat datang, pendamping ananda {namapanggilan}, silakan menuju {kelompok}, nomor antrian {antrian}`,
-                tplJapriQr: `Halo Selamat {salam} *{namasiswa}*,\n\nBerikut adalah tautan Kartu QR Code Absensi Kegiatan Sekolah Anda (NISN: *{nisn}* - *{kelompok}*):\n{qrcode}\n\nSilakan simpan atau tunjukkan QR Code tersebut kepada petugas saat kegiatan berlangsung. Terima kasih.`,
+                tplJapriQr: `Halo Selamat {salam} *{namasiswa}*,\n\nBerikut adalah Kartu QR Code Absensi Kegiatan Sekolah Anda (NISN: *{nisn}* - *{kelompok}*).\n\nSilakan simpan atau tunjukkan QR Code ini kepada petugas saat kegiatan berlangsung. Terima kasih.`,
                 tplNotifHadir: `Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}*,\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran berhasil tercatat:\n🏫 Kelompok / Ruangan: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}*\n\nSilakan menuju ruangan *{kelompok}* sesuai nomor antrian Anda. Terima kasih.`,
                 tplNotifTelegram: `Selamat {salam} Ayah/Bunda pendamping ananda *{namasiswa}* ({namapanggilan}).\n\nSelamat datang di kegiatan *{kegiatan}*. Presensi kehadiran berhasil tercatat:\n🏫 Kelompok / Ruangan: *{kelompok}*\n🔢 Nomor Antrian: *#{antrian}*\n⏰ Waktu Kedatangan: *{waktu}* ({status})\n\nSilakan menuju ruangan *{kelompok}* sesuai nomor antrian Anda. Terima kasih.`
             },
@@ -2731,17 +2750,6 @@ function jsonResponse(obj) {
             ctx.fill();
 
             ctx.fillStyle = '#ffffff';
-            ctx.textAlign = 'center';
-            ctx.font = 'bold 25px Inter, Arial, sans-serif';
-            ctx.fillText('KARTU QR PRESENSI SEKOLAH', 320, 98);
-
-            const badgeRole = (student.statusPeserta || 'CALON SISWA').toUpperCase();
-            const kelompokLabel = (student.kelompok || 'Kelompok 1').toUpperCase();
-            ctx.font = 'bold 16px Inter, Arial, sans-serif';
-            ctx.fillStyle = '#a5f3fc';
-            ctx.fillText(`${badgeRole} • ${kelompokLabel}`, 320, 136);
-
-            ctx.fillStyle = '#f8fafc';
             ctx.strokeStyle = '#e2e8f0';
             ctx.lineWidth = 3;
             ctx.beginPath();
@@ -2753,14 +2761,14 @@ function jsonResponse(obj) {
             if (typeof QRious !== 'undefined') {
                 new QRious({
                     element: qrCanvas,
-                    value: String(student.nisn),
-                    size: 310,
+                    value: String(student.nisn).trim(),
+                    size: 320,
                     level: 'M',
                     background: '#ffffff',
-                    foreground: '#0f172a',
-                    padding: 12
+                    foreground: '#000000',
+                    padding: 22
                 });
-                ctx.drawImage(qrCanvas, 165, 230, 310, 310);
+                ctx.drawImage(qrCanvas, 160, 225, 320, 320);
             }
 
             ctx.fillStyle = '#0f172a';
@@ -3534,7 +3542,10 @@ function jsonResponse(obj) {
                 .replace(/\{status\}/gi, data.status || '-');
 
             if (options.omitQrUrl) {
-                result = result.replace(/\n{3,}/g, '\n\n').trim();
+                result = result
+                    .replace(/:\s*\n\s*(\n|$)/g, '.\n\n')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .trim();
             }
             return result;
         }
@@ -3896,8 +3907,9 @@ function jsonResponse(obj) {
                     const panggilan = s.panggilan || formatNamaPanggilan(s);
                     const badgeRole = s.statusPeserta || 'CALON SISWA';
                     const kelompok = s.kelompok || 'Kelompok 1';
+                    const isSent = Boolean(state.japriSentMap[s.nisn]);
                     return `
-                        <div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm space-y-3">
+                        <div class="bg-white rounded-2xl p-3.5 border ${isSent ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200/80'} shadow-sm space-y-3">
                             <div class="flex items-start gap-3">
                                 <button type="button" onclick="triggerButtonWithProgress(this, null, () => openQrModal('${s.nisn}'))" class="w-14 h-14 rounded-xl border border-slate-200 bg-white p-1 shadow-sm shrink-0 cursor-pointer">
                                     <img src="${qrUrl}" alt="QR ${s.nisn}" class="w-full h-full object-contain">
@@ -3910,9 +3922,7 @@ function jsonResponse(obj) {
                                         <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70 font-extrabold text-[9px] uppercase tracking-wider">
                                             ${badgeRole}
                                         </span>
-                                        <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-bold text-[10px]">
-                                            ${s.kelas}
-                                        </span>
+                                        ${isSent ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[9px]">✓ Sudah Dijapri</span>` : ''}
                                     </div>
                                     <h4 class="font-bold text-slate-900 text-sm leading-snug truncate">${s.nama}</h4>
                                     <div class="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5 flex-wrap">
@@ -3927,8 +3937,8 @@ function jsonResponse(obj) {
                                 <button type="button" onclick="triggerButtonWithProgress(this, 'Memuat...', () => openQrModal('${s.nisn}'))" class="py-2 px-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold flex items-center justify-center gap-1 cursor-pointer">
                                     <i class="fa-solid fa-qrcode"></i> <span>Kartu QR</span>
                                 </button>
-                                <button type="button" onclick="japriWaQrSiswa('${s.nisn}', true)" class="py-2 px-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold shadow-sm flex items-center justify-center gap-1 cursor-pointer" title="Otomatis Salin Gambar Kartu QR & Buka WA dengan Caption + Link Kartu">
-                                    <i class="fa-brands fa-whatsapp text-xs"></i> <span>Japri WA</span>
+                                <button type="button" onclick="japriWaQrSiswa('${s.nisn}', true)" class="py-2 px-2 rounded-xl ${isSent ? 'bg-teal-700 hover:bg-teal-800' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-[11px] font-extrabold shadow-sm flex items-center justify-center gap-1 cursor-pointer" title="Salin Foto Kartu QR & Langsung Buka Nomor WA Tujuan">
+                                    <i class="fa-brands fa-whatsapp text-xs"></i> <span>${isSent ? 'Kirim Lagi' : 'Japri Foto'}</span>
                                 </button>
                                 <button type="button" onclick="triggerButtonWithProgress(this, 'Kirim TG...', () => sendStudentQrPhotoToTelegram('${s.nisn}'))" class="py-2 px-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-[11px] font-extrabold shadow-sm flex items-center justify-center gap-1 cursor-pointer" title="Kirim Foto Kartu QR + Caption + Tombol WA ke Telegram">
                                     <i class="fa-brands fa-telegram text-xs"></i> <span>Foto TG</span>
@@ -3946,8 +3956,9 @@ function jsonResponse(obj) {
                     const panggilan = s.panggilan || formatNamaPanggilan(s);
                     const badgeRole = s.statusPeserta || 'CALON SISWA';
                     const kelompok = s.kelompok || 'Kelompok 1';
+                    const isSent = Boolean(state.japriSentMap[s.nisn]);
                     return `
-                        <tr class="hover:bg-slate-50/80 transition-colors">
+                        <tr class="hover:bg-slate-50/80 transition-colors ${isSent ? 'bg-emerald-50/30' : ''}">
                             <td class="py-3 px-4">
                                 <button type="button" onclick="triggerButtonWithProgress(this, null, () => openQrModal('${s.nisn}'))" class="group relative w-12 h-12 rounded-xl border border-slate-200 bg-white p-1 shadow-sm hover:border-indigo-500 transition-all cursor-pointer" title="Klik untuk perbesar QR Code">
                                     <img src="${qrUrl}" alt="QR ${s.nisn}" class="w-full h-full object-contain">
@@ -3964,6 +3975,7 @@ function jsonResponse(obj) {
                                             <span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-bold" title="Kolom Nama Panggilan (Suara)">
                                                 <i class="fa-solid fa-volume-high text-[9px] mr-0.5"></i>${panggilan}
                                             </span>
+                                            ${isSent ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold">✓ Sudah Dijapri</span>` : ''}
                                         </div>
                                         <p class="text-xs font-mono text-slate-500">NISN: ${s.nisn}</p>
                                     </div>
@@ -3993,8 +4005,8 @@ function jsonResponse(obj) {
                                     <button type="button" onclick="triggerButtonWithProgress(this, 'Memuat...', () => openQrModal('${s.nisn}'))" class="px-2.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all cursor-pointer" title="Pratinjau Kartu QR">
                                         <i class="fa-solid fa-qrcode mr-1"></i> QR
                                     </button>
-                                    <button type="button" onclick="japriWaQrSiswa('${s.nisn}', true)" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer" title="1-Klik: Otomatis Salin Gambar Kartu QR & Buka Chat WA dengan Caption + Link Kartu">
-                                        <i class="fa-brands fa-whatsapp text-sm"></i> Japri WA
+                                    <button type="button" onclick="japriWaQrSiswa('${s.nisn}', true)" class="px-3 py-2 rounded-xl ${isSent ? 'bg-teal-700 hover:bg-teal-800' : 'bg-emerald-600 hover:bg-emerald-700'} text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer" title="1-Klik: Salin Gambar Kartu QR & Buka Nomor WA Tujuan (Tinggal Tekan Ctrl+V & Enter)">
+                                        <i class="fa-brands fa-whatsapp text-sm"></i> <span>${isSent ? 'Kirim Ulang' : 'Japri Foto WA'}</span>
                                     </button>
                                     <button type="button" onclick="triggerButtonWithProgress(this, 'Kirim TG...', () => sendStudentQrPhotoToTelegram('${s.nisn}'))" class="px-2.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold shadow-sm transition-all flex items-center gap-1 cursor-pointer" title="Kirim Foto Kartu QR + Caption + Tombol WA langsung ke Telegram Bot">
                                         <i class="fa-brands fa-telegram text-sm"></i> TG
@@ -4378,10 +4390,11 @@ function jsonResponse(obj) {
                 return;
             }
 
-            // Salin gambar Kartu QR ke Clipboard terlebih dahulu (untuk Paste Ctrl+V di PC atau Paste Papan Ketik di HP)
-            // TANPA memanggil navigator.share agar WhatsApp LANGSUNG membuka ruang chat nomor wali murid tujuan (tanpa cari kontak manual).
+            // 1. Salin Gambar Kartu QR ke Clipboard terlebih dahulu
             const copied = await copyStudentQrImageToClipboard(student, true);
 
+            // 2. Buat teks caption bersih TANPA link URL panjang (kecuali jika opsi "Sertakan Link Gambar QR" dicentang manual oleh admin)
+            const omitLinks = !state.config.includeQrUrlInWaText;
             const messageForWaWeb = parseTemplateMessage(state.config.tplJapriQr, {
                 nama: student.nama,
                 panggilan: student.panggilan || formatNamaPanggilan(student),
@@ -4392,16 +4405,21 @@ function jsonResponse(obj) {
                 kegiatan: activeEvent ? activeEvent.nama : 'Kegiatan Sekolah',
                 waktu: '-',
                 status: 'Terdaftar'
-            }, { omitQrUrl: false });
+            }, { omitQrUrl: omitLinks });
 
-            // Gunakan URL langsung ke nomor tujuan agar langsung membuka ruang chat kontak tanpa perlu mencari/menyimpan nomor
+            // Tandai siswa sudah dijapri agar memudahkan Admin mengirim satu per satu
+            state.japriSentMap[student.nisn] = true;
+            renderSiswaTable();
+
+            // 3. Langsung buka ruang chat nomor WA wali murid tujuan (tanpa cari kontak)
             const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageForWaWeb)}`;
             window.open(waUrl, '_blank');
 
             if (copied) {
-                showToast(`✓ Langsung membuka Chat WA ${student.panggilan || student.nama}! Gambar Kartu QR sudah disalin (tekan Tempel/Ctrl+V di kolom chat) & Link Kartu QR sudah terlampir.`, 'success');
+                showToast(`📸 FOTO KARTU QR SUDAH TERSALIN! Begitu chat WA ${student.panggilan || student.nama} terbuka, langsung tekan Ctrl + V (Paste) lalu tekan Enter.`, 'success');
             } else {
-                showToast(`✓ Langsung membuka Chat WA ${student.panggilan || student.nama} dengan Caption & Link Kartu QR Digital!`, 'success');
+                await downloadStudentQrCardPng(student.nisn);
+                showToast(`Membuka chat WA ${student.panggilan || student.nama}! File foto Kartu QR telah diunduh otomatis untuk dilampirkan.`, 'info');
             }
         }
 
@@ -4428,9 +4446,8 @@ function jsonResponse(obj) {
             const activeEvent = state.kegiatan.find(k => k.id === state.activeEventId) || state.kegiatan[0];
             const cleanPhone = normalizePhoneTo62(student.wa);
 
-            // Sertakan Link Kartu QR Digital & Gambar QR (omitQrUrl: false) agar saat tombol Japri WA di Telegram diklik,
-            // langsung membuka ruang chat nomor WA wali murid dengan tautan Kartu QR + preview gambar QR secara utuh.
-            const captionWithQrLink = parseTemplateMessage(state.config.tplJapriQr, {
+            // Gunakan caption bersih tanpa link panjang karena foto Kartu QR sudah dikirim di atasnya
+            const cleanCaption = parseTemplateMessage(state.config.tplJapriQr, {
                 nama: student.nama,
                 panggilan: student.panggilan || formatNamaPanggilan(student),
                 nisn: student.nisn,
@@ -4440,17 +4457,17 @@ function jsonResponse(obj) {
                 kegiatan: activeEvent ? activeEvent.nama : 'Kegiatan Sekolah',
                 waktu: '-',
                 status: 'Terdaftar'
-            }, { omitQrUrl: false });
+            }, { omitQrUrl: true });
 
             try {
                 const blob = await generateStudentQrCardBlob(student);
                 const formData = new FormData();
                 formData.append('chat_id', chatId);
                 formData.append('photo', blob, `Kartu_QR_${student.nisn}.png`);
-                formData.append('caption', captionWithQrLink);
+                formData.append('caption', cleanCaption);
 
                 if (cleanPhone) {
-                    const waDirectUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(captionWithQrLink)}`;
+                    const waDirectUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(cleanCaption)}`;
                     formData.append('reply_markup', JSON.stringify({
                         inline_keyboard: [[
                             { text: `📲 Japri WA Wali Murid (${student.panggilan || student.nama})`, url: waDirectUrl }
@@ -4612,77 +4629,256 @@ function jsonResponse(obj) {
             window.open(waUrl, '_blank');
         }
 
-        function toggleCamera(e) {
+        /**
+         * FITUR MIRROR / FLIP HORIZONTAL KAMERA & SWITCH KAMERA DEPAN/BELAKANG + DUAL-PASS QR DETECTOR
+         */
+        function applyCameraMirrorUI() {
+            const qrReaderEl = document.getElementById('qr-reader');
+            const mirrorLabel = document.getElementById('mirror-camera-label');
+            const mirrorBtn = document.getElementById('btn-mirror-camera');
+            if (qrReaderEl) {
+                qrReaderEl.classList.toggle('camera-mirrored', Boolean(state.cameraMirrored));
+            }
+            if (mirrorLabel) {
+                mirrorLabel.textContent = state.cameraMirrored ? 'Mirror: ON' : 'Mirror: OFF';
+            }
+            if (mirrorBtn) {
+                mirrorBtn.className = state.cameraMirrored
+                    ? 'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 text-[11px] font-extrabold transition-all cursor-pointer shadow-xs'
+                    : 'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-bold text-amber-200 transition-all cursor-pointer';
+            }
+        }
+
+        function toggleCameraMirror(e) {
             if (e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
+            state.cameraMirrored = !state.cameraMirrored;
+            applyCameraMirrorUI();
+            showToast(
+                state.cameraMirrored
+                    ? 'Mode Cermin (Mirror) Aktif: Arah kiri-kanan kamera disesuaikan untuk kamera depan/laptop.'
+                    : 'Mode Cermin (Mirror) Nonaktif: Arah kamera standar untuk kamera belakang.',
+                'info'
+            );
+        }
+
+        async function switchCameraDevice(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            try {
+                if (!state.availableCameras || state.availableCameras.length === 0) {
+                    const cams = await Html5Qrcode.getCameras();
+                    if (cams && cams.length > 0) {
+                        state.availableCameras = cams;
+                    }
+                }
+            } catch (err) {}
+
+            if (state.availableCameras && state.availableCameras.length > 1) {
+                state.currentCameraIndex = (state.currentCameraIndex + 1) % state.availableCameras.length;
+                const nextCam = state.availableCameras[state.currentCameraIndex];
+                const isFrontCam = /front|depan|user|integrated|webcam|facetime/i.test(nextCam.label || '');
+                state.cameraMirrored = isFrontCam;
+                applyCameraMirrorUI();
+
+                const switchLabel = document.getElementById('switch-camera-label');
+                if (switchLabel) {
+                    switchLabel.textContent = `Kamera ${state.currentCameraIndex + 1}/${state.availableCameras.length}`;
+                }
+            } else {
+                state.facingModePref = state.facingModePref === 'environment' ? 'user' : 'environment';
+                state.cameraMirrored = (state.facingModePref === 'user');
+                applyCameraMirrorUI();
+
+                const switchLabel = document.getElementById('switch-camera-label');
+                if (switchLabel) {
+                    switchLabel.textContent = state.facingModePref === 'user' ? 'Kamera Depan' : 'Kamera Belakang';
+                }
+            }
+
+            if (state.cameraActive) {
+                await stopCameraScannerInternal();
+                await startCameraScannerInternal();
+            } else {
+                await startCameraScannerInternal();
+            }
+        }
+
+        function stopParallelVideoQrDetector() {
+            if (state.parallelScanTimer) {
+                clearInterval(state.parallelScanTimer);
+                state.parallelScanTimer = null;
+            }
+        }
+
+        function startParallelVideoQrDetector() {
+            stopParallelVideoQrDetector();
+            if (!('BarcodeDetector' in window)) return;
+
+            let nativeDetector = null;
+            try {
+                nativeDetector = new window.BarcodeDetector({ formats: ['qr_code'] });
+            } catch (e) {
+                return;
+            }
+
+            const offCanvas = document.createElement('canvas');
+            const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+            state.parallelScanTimer = setInterval(async () => {
+                if (!state.cameraActive || state.isScanningCooldown) return;
+                const videoEl = document.querySelector('#qr-reader video');
+                if (!videoEl || videoEl.readyState < 2 || !videoEl.videoWidth) return;
+
+                try {
+                    // Pass 1: Direct hardware QR detection on live video element
+                    const directCodes = await nativeDetector.detect(videoEl);
+                    if (directCodes && directCodes.length > 0 && directCodes[0].rawValue) {
+                        processQrScan(directCodes[0].rawValue);
+                        return;
+                    }
+
+                    // Pass 2: Horizontally flipped canvas detection (handles mirrored front cameras or inverted QR)
+                    offCanvas.width = videoEl.videoWidth;
+                    offCanvas.height = videoEl.videoHeight;
+                    offCtx.save();
+                    offCtx.translate(offCanvas.width, 0);
+                    offCtx.scale(-1, 1);
+                    offCtx.drawImage(videoEl, 0, 0, offCanvas.width, offCanvas.height);
+                    offCtx.restore();
+
+                    const flippedCodes = await nativeDetector.detect(offCanvas);
+                    if (flippedCodes && flippedCodes.length > 0 && flippedCodes[0].rawValue) {
+                        processQrScan(flippedCodes[0].rawValue);
+                    }
+                } catch (err) {}
+            }, 180);
+        }
+
+        async function stopCameraScannerInternal() {
+            stopParallelVideoQrDetector();
+            const qrReaderEl = document.getElementById('qr-reader');
+            const frameOverlay = document.getElementById('scanner-frame-overlay');
+            if (frameOverlay) frameOverlay.classList.add('hidden');
+            if (qrReaderEl) qrReaderEl.classList.remove('video-ready');
+
+            if (state.html5QrCode && state.cameraActive) {
+                try {
+                    await state.html5QrCode.stop();
+                } catch (e) {}
+            }
+            state.cameraActive = false;
+        }
+
+        async function startCameraScannerInternal() {
             const btn = document.getElementById('btn-toggle-camera');
             const placeholder = document.getElementById('camera-placeholder');
             const loadingOverlay = document.getElementById('camera-loading-overlay');
             const frameOverlay = document.getElementById('scanner-frame-overlay');
             const qrReaderEl = document.getElementById('qr-reader');
 
-            if (!state.cameraActive) {
-                placeholder.classList.add('hidden');
-                loadingOverlay.classList.remove('hidden');
-                qrReaderEl.classList.remove('video-ready');
-                btn.disabled = true;
+            placeholder.classList.add('hidden');
+            loadingOverlay.classList.remove('hidden');
+            qrReaderEl.classList.remove('video-ready');
+            btn.disabled = true;
 
-                if (!state.html5QrCode) {
-                    state.html5QrCode = new Html5Qrcode("qr-reader");
+            if (!state.html5QrCode) {
+                state.html5QrCode = new Html5Qrcode("qr-reader", {
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    verbose: false
+                });
+            }
+
+            try {
+                if (!state.availableCameras || state.availableCameras.length === 0) {
+                    const cams = await Html5Qrcode.getCameras();
+                    if (cams && cams.length > 0) {
+                        state.availableCameras = cams;
+                        // Pilih kamera belakang jika di HP, atau webcam pertama jika di laptop
+                        const backIdx = cams.findIndex(c => /back|belakang|rear|environment/i.test(c.label || ''));
+                        state.currentCameraIndex = backIdx >= 0 ? backIdx : 0;
+                        const activeCam = cams[state.currentCameraIndex];
+                        const isFrontOrLaptop = backIdx === -1 || /front|depan|user|integrated|webcam|facetime/i.test(activeCam.label || '');
+                        state.cameraMirrored = isFrontOrLaptop;
+                    }
                 }
+            } catch (e) {}
 
-                const config = {
-                    fps: 20,
-                    qrbox: function(viewfinderWidth, viewfinderHeight) {
-                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                        const boxSize = Math.max(220, Math.floor(minEdge * 0.88));
-                        return { width: boxSize, height: boxSize };
-                    },
-                    disableFlip: false
-                };
+            applyCameraMirrorUI();
 
-                state.html5QrCode.start(
-                    { facingMode: "environment" },
+            // Gunakan Full-Frame Scanning (tanpa membatasi qrbox kecil yang terpotong object-fit: cover)
+            // dan aktifkan disableFlip: false agar html5-qrcode juga memindai frame normal + terbalik (mirrored)
+            const config = {
+                fps: 24,
+                disableFlip: false
+            };
+
+            const cameraConstraint = (state.availableCameras && state.availableCameras.length > 0)
+                ? state.availableCameras[state.currentCameraIndex].id
+                : { facingMode: state.facingModePref };
+
+            try {
+                await state.html5QrCode.start(
+                    cameraConstraint,
                     config,
                     (decodedText) => {
                         processQrScan(decodedText);
                     },
                     () => {}
-                ).then(() => {
-                    state.cameraActive = true;
-                    setTimeout(() => {
-                        qrReaderEl.classList.add('video-ready');
-                        loadingOverlay.classList.add('hidden');
-                        frameOverlay.classList.remove('hidden');
-                        btn.disabled = false;
-                        btn.innerHTML = `<i class="fa-solid fa-video-slash text-xs"></i><span>Matikan Kamera</span>`;
-                        btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-white bg-rose-500 hover:bg-rose-400 shadow-xs transition-all cursor-pointer';
-                        showToast('Kamera aktif! Area baca QR diperluas agar lebih responsif.', 'success');
-                    }, 220);
-                }).catch(() => {
-                    btn.disabled = false;
+                );
+
+                state.cameraActive = true;
+                startParallelVideoQrDetector();
+
+                const camName = (state.availableCameras && state.availableCameras[state.currentCameraIndex])
+                    ? state.availableCameras[state.currentCameraIndex].label
+                    : (state.facingModePref === 'user' ? 'Kamera Depan' : 'Kamera Belakang');
+
+                const activeLabelEl = document.getElementById('camera-active-label');
+                if (activeLabelEl && camName) {
+                    activeLabelEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> ${camName.slice(0, 18)}`;
+                }
+
+                setTimeout(() => {
+                    qrReaderEl.classList.add('video-ready');
                     loadingOverlay.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
-                    frameOverlay.classList.add('hidden');
-                    showToast('Izin kamera tidak tersedia di perangkat ini. Gunakan tombol Simulasi Scan.', 'warning');
-                });
+                    frameOverlay.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-solid fa-video-slash text-xs"></i><span>Matikan Kamera</span>`;
+                    btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-white bg-rose-500 hover:bg-rose-400 shadow-xs transition-all cursor-pointer';
+                    showToast(`Kamera aktif (${camName || 'Siap Scan'})! Sensor baca full-frame & mirror siap memindai.`, 'success');
+                }, 200);
+            } catch (err) {
+                btn.disabled = false;
+                loadingOverlay.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+                frameOverlay.classList.add('hidden');
+                showToast('Izin kamera tidak tersedia atau kamera sedang dipakai aplikasi lain.', 'warning');
+            }
+        }
+
+        async function toggleCamera(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const btn = document.getElementById('btn-toggle-camera');
+            const placeholder = document.getElementById('camera-placeholder');
+
+            if (!state.cameraActive) {
+                await startCameraScannerInternal();
             } else {
                 btn.disabled = true;
-                frameOverlay.classList.add('hidden');
-                qrReaderEl.classList.remove('video-ready');
-
-                state.html5QrCode.stop().then(() => {
-                    state.cameraActive = false;
-                    btn.disabled = false;
-                    placeholder.classList.remove('hidden');
-                    btn.innerHTML = `<i class="fa-solid fa-camera text-xs"></i><span>Hidupkan Kamera</span>`;
-                    btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-slate-900 bg-emerald-400 hover:bg-emerald-300 shadow-xs transition-all cursor-pointer';
-                    showToast('Kamera pemindai dimatikan.', 'info');
-                }).catch(() => {
-                    btn.disabled = false;
-                });
+                await stopCameraScannerInternal();
+                btn.disabled = false;
+                placeholder.classList.remove('hidden');
+                btn.innerHTML = `<i class="fa-solid fa-camera text-xs"></i><span>Hidupkan Kamera</span>`;
+                btn.className = 'inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 shadow-xs transition-all cursor-pointer';
+                showToast('Kamera pemindai dimatikan.', 'info');
             }
         }
 
