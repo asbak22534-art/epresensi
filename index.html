@@ -656,11 +656,11 @@
                         <div class="pt-2 border-t border-slate-100">
                             <div class="flex items-center justify-between mb-1.5">
                                 <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                                    <i class="fa-solid fa-layer-group text-violet-600"></i> Posisi Antrian Kelompok:
+                                    <i class="fa-solid fa-user-tie text-teal-600"></i> Posisi Antrian Penginterview:
                                 </span>
                                 <span class="text-[10px] font-semibold text-emerald-600">● Live</span>
                             </div>
-                            <div id="scanner-kelompok-summary" class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                            <div id="scanner-kelompok-summary" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                             </div>
                         </div>
 
@@ -821,8 +821,8 @@
             <section id="tab-log" class="tab-content hidden space-y-5">
                 <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Riwayat Kehadiran & Nomor Antrian Kelompok</h3>
-                        <p class="text-xs text-slate-500 mt-0.5">Urutan nomor antrian dihitung otomatis berdasarkan waktu kedatangan pada masing-masing kelompok.</p>
+                        <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Riwayat Kehadiran & Nomor Antrian Penginterview</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Urutan nomor antrian dihitung otomatis berdasarkan waktu kedatangan pada masing-masing penginterview.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
                         <button type="button" onclick="triggerButtonWithProgress(this, 'Mengekspor...', () => exportLogCSV())" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm cursor-pointer">
@@ -839,7 +839,7 @@
                         <table class="w-full text-left border-collapse text-xs sm:text-sm">
                             <thead>
                                 <tr class="bg-slate-900 text-white uppercase text-[11px] tracking-wider">
-                                    <th class="py-3.5 px-4 font-bold">Antrian & Kelompok</th>
+                                    <th class="py-3.5 px-4 font-bold">Antrian & Penginterview</th>
                                     <th class="py-3.5 px-4 font-bold">Waktu Hadir</th>
                                     <th class="py-3.5 px-4 font-bold">Siswa</th>
                                     <th class="py-3.5 px-4 font-bold">Kelas</th>
@@ -1298,7 +1298,7 @@
                     </div>
                     <pre id="gas-code-block" class="p-4 sm:p-6 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed max-h-[540px]"><code>/**
  * ============================================================================
- * SISTEM ABSENSI QR CODE, ANTRIAN KELOMPOK, WA & TELEGRAM BOT - BACKEND GAS
+ * SISTEM ABSENSI QR CODE, ANTRIAN PENGINTERVIEW, WA & TELEGRAM BOT - BACKEND GAS
  * Aman Data Lama: syncAndUpgradeSheets() hanya menambahkan kolom/baris yang belum ada
  * ============================================================================
  */
@@ -1307,7 +1307,7 @@ const SHEET_NAMES = {
   SISWA: 'Data_Siswa',
   KEGIATAN: 'Data_Kegiatan',
   LOG: 'Log_Kehadiran',
-  ANTRIAN: 'Antrian_Kelompok',
+  ANTRIAN: 'Antrian_Penginterview',
   PENGINTERVIEW: 'Data_Penginterview',
   CONFIG: 'Konfigurasi'
 };
@@ -1356,10 +1356,11 @@ function syncAndUpgradeSheets() {
       tabColor: '#d97706',
       headerBg: '#78350f',
       headerFg: '#ffffff',
-      headers: ['ID Log', 'Timestamp ISO', 'Waktu Kedatangan', 'ID Kegiatan', 'Nama Kegiatan', 'NISN', 'Nama Siswa', 'Nama Panggilan', 'Jenis Kelamin', 'Kelas', 'Badge Status', 'Kelompok', 'No Antrian', 'Status Kehadiran', 'No WA', 'Status Notif WA'],
-      widths: [120, 165, 135, 105, 200, 125, 210, 130, 110, 95, 135, 135, 105, 130, 140, 185],
+      headers: ['ID Log', 'Timestamp ISO', 'Waktu Kedatangan', 'ID Kegiatan', 'Nama Kegiatan', 'NISN', 'Nama Siswa', 'Nama Panggilan', 'Jenis Kelamin', 'Kelas', 'Badge Status', 'Kelompok', 'Penginterview', 'No Antrian', 'Status Kehadiran', 'No WA', 'Status Notif WA'],
+      widths: [120, 165, 135, 105, 200, 125, 210, 130, 110, 95, 135, 135, 210, 105, 130, 140, 185],
       defaultVal: (h) => {
         if (h === 'Kelompok') return 'Kelompok 1';
+        if (h === 'Penginterview') return '-';
         if (h === 'No Antrian') return '01';
         return '';
       },
@@ -1463,6 +1464,7 @@ function syncAndUpgradeSheets() {
 
   setupAntrianKelompokSheet(ss);
   ensurePenginterviewSheet(ss, report);
+  setupAntrianPenginterviewSheet(ss);
 
   SpreadsheetApp.flush();
   return {
@@ -1511,53 +1513,80 @@ function initializeSheets() {
 }
 
 /**
- * PAPAN ANTRIAN BERDAMPINGAN OTOMATIS PER KELOMPOK
+ * PAPAN ANTRIAN BERDAMPINGAN OTOMATIS PER PENGINTERVIEW
+ * Membaca daftar nama penginterview langsung dari sheet Data_Penginterview.
  */
-function setupAntrianKelompokSheet(ss) {
+function setupAntrianPenginterviewSheet(ss) {
   let qSheet = ss.getSheetByName(SHEET_NAMES.ANTRIAN);
   if (!qSheet) {
     qSheet = ss.insertSheet(SHEET_NAMES.ANTRIAN);
   }
-  qSheet.setTabColor('#8b5cf6');
+  qSheet.clear();
+  qSheet.setTabColor('#0d9488');
   qSheet.setFrozenRows(3);
 
-  const groups = [
-    { name: 'Kelompok 1', startCol: 1, headerBg: '#4f46e5', subBg: '#eef2ff' },
-    { name: 'Kelompok 2', startCol: 6, headerBg: '#059669', subBg: '#ecfdf5' },
-    { name: 'Kelompok 3', startCol: 11, headerBg: '#d97706', subBg: '#fffbeb' },
-    { name: 'Kelompok 4', startCol: 16, headerBg: '#e11d48', subBg: '#fff1f2' }
+  // Ambil daftar penginterview unik dari sheet Data_Penginterview
+  let interviewerNames = [];
+  const pSheet = ss.getSheetByName(SHEET_NAMES.PENGINTERVIEW);
+  if (pSheet && pSheet.getLastRow() > 1) {
+    const pHeaders = pSheet.getRange(1, 1, 1, pSheet.getLastColumn()).getDisplayValues()[0].map(h => String(h).trim().toLowerCase());
+    let nameCol = pHeaders.findIndex(h => /penginterview|pewawancara|interviewer|ustadz|guru|penguji/.test(h));
+    if (nameCol === -1) nameCol = pHeaders.length >= 2 ? 1 : 0;
+    const pRows = pSheet.getRange(2, nameCol + 1, pSheet.getLastRow() - 1, 1).getDisplayValues();
+    pRows.forEach(r => {
+      const nm = String(r[0] || '').trim();
+      if (nm && interviewerNames.indexOf(nm) === -1) {
+        interviewerNames.push(nm);
+      }
+    });
+  }
+  if (interviewerNames.length === 0) {
+    interviewerNames = ['Ustadz Ahmad Fauzan, S.Pd.', 'Ustadzah Siti Aisyah, S.Pd.I.', 'Ustadz M. Ridwan, M.Pd.'];
+  }
+
+  const palette = [
+    { headerBg: '#0f766e', subBg: '#f0fdfa' },
+    { headerBg: '#4f46e5', subBg: '#eef2ff' },
+    { headerBg: '#d97706', subBg: '#fffbeb' },
+    { headerBg: '#e11d48', subBg: '#fff1f2' },
+    { headerBg: '#0284c7', subBg: '#f0f9ff' },
+    { headerBg: '#7c3aed', subBg: '#f5f3ff' }
   ];
 
   qSheet.setRowHeight(1, 38);
   qSheet.setRowHeight(2, 26);
   qSheet.setRowHeight(3, 30);
 
-  groups.forEach(g => {
-    const c = g.startCol;
+  interviewerNames.forEach((name, idx) => {
+    const c = (idx * 5) + 1;
+    const colors = palette[idx % palette.length];
+    const safeName = name.replace(/'/g, "''");
+    const safeDoubleQuote = name.replace(/"/g, '""');
+
     qSheet.getRange(1, c, 1, 4).merge()
-      .setValue('📋 ANTRIAN ' + g.name.toUpperCase())
-      .setBackground(g.headerBg)
+      .setValue('🎙️ ' + name.toUpperCase())
+      .setBackground(colors.headerBg)
       .setFontColor('#ffffff')
       .setFontWeight('bold')
-      .setFontSize(11)
+      .setFontSize(10)
       .setHorizontalAlignment('center')
       .setVerticalAlignment('middle');
 
     qSheet.getRange(2, c, 1, 2).merge()
-      .setValue('Total Hadir ' + g.name + ':')
-      .setBackground(g.subBg)
+      .setValue('Total Antrian:')
+      .setBackground(colors.subBg)
       .setFontWeight('bold')
       .setFontSize(9)
       .setHorizontalAlignment('right');
     qSheet.getRange(2, c + 2, 1, 2).merge()
-      .setFormula('=COUNTIF(Log_Kehadiran!$L$2:$L, "' + g.name + '") & " Peserta"')
-      .setBackground(g.subBg)
+      .setFormula('=COUNTIF(Log_Kehadiran!$M$2:$M, "' + safeDoubleQuote + '") & " Peserta"')
+      .setBackground(colors.subBg)
       .setFontWeight('bold')
       .setFontSize(10)
       .setHorizontalAlignment('center');
 
     qSheet.getRange(3, c, 1, 4)
-      .setValues([['No Antrian', 'Nama Siswa', 'Waktu Hadir', 'NISN']])
+      .setValues([['No Antrian', 'Nama Siswa', 'Kelompok', 'Waktu Hadir']])
       .setBackground('#1e293b')
       .setFontColor('#ffffff')
       .setFontWeight('bold')
@@ -1565,15 +1594,20 @@ function setupAntrianKelompokSheet(ss) {
       .setHorizontalAlignment('center')
       .setVerticalAlignment('middle');
 
-    const formula = '=IFERROR(QUERY(Log_Kehadiran!$A$2:$P, "SELECT M, G, C, F WHERE L = \'' + g.name + '\' ORDER BY M ASC", 0), {"-", "Belum ada peserta hadir", "-", "-"})';
+    // Kolom M = Penginterview, N = No Antrian, G = Nama Siswa, L = Kelompok, C = Waktu Kedatangan
+    const formula = '=IFERROR(QUERY(Log_Kehadiran!$A$2:$Q, "SELECT N, G, L, C WHERE M = \'' + safeName + '\' ORDER BY N ASC", 0), {"-", "Belum ada peserta hadir", "-", "-"})';
     qSheet.getRange(4, c).setFormula(formula);
 
     qSheet.setColumnWidth(c, 85);
     qSheet.setColumnWidth(c + 1, 195);
-    qSheet.setColumnWidth(c + 2, 100);
-    qSheet.setColumnWidth(c + 3, 115);
+    qSheet.setColumnWidth(c + 2, 115);
+    qSheet.setColumnWidth(c + 3, 100);
     qSheet.setColumnWidth(c + 4, 24);
   });
+}
+
+function setupAntrianKelompokSheet(ss) {
+  return setupAntrianPenginterviewSheet(ss);
 }
 
 /**
@@ -1627,7 +1661,7 @@ function doPost(e) {
 }
 
 /**
- * 3. PENCATATAN PRESENSI, PENOMORAN ANTRIAN, WA GATEWAY & TELEGRAM BOT + TOMBOL JAPRI WA
+ * 3. PENCATATAN PRESENSI, PENOMORAN ANTRIAN PER PENGINTERVIEW, WA GATEWAY & TELEGRAM BOT
  */
 function handleScanAttendance(payload) {
   const lock = LockService.getScriptLock();
@@ -1639,19 +1673,30 @@ function handleScanAttendance(payload) {
     if (!logSheet) {
       syncAndUpgradeSheets();
       logSheet = ss.getSheetByName(SHEET_NAMES.LOG);
+    } else {
+      // Pastikan kolom Penginterview tersedia tanpa menghapus data lama
+      const curHeaders = logSheet.getRange(1, 1, 1, Math.max(logSheet.getLastColumn(), 1)).getDisplayValues()[0].map(h => String(h).trim().toLowerCase());
+      if (curHeaders.indexOf('penginterview') === -1) {
+        syncAndUpgradeSheets();
+      }
     }
 
     const kelompokName = String(payload.kelompok || 'Kelompok 1').trim();
+    const rawPenginterview = String(payload.penginterview || '').trim();
+    const penginterviewName = (rawPenginterview && rawPenginterview !== '-') ? rawPenginterview : kelompokName;
     const idKegiatan = String(payload.idKegiatan || 'KEG-001').trim();
 
     let queueCounter = 1;
     const lastRow = logSheet.getLastRow();
     if (lastRow > 1) {
-      const existingLogs = logSheet.getRange(2, 4, lastRow - 1, 9).getDisplayValues();
+      // Kolom D (4) = ID Kegiatan, Kolom L (12) = Kelompok, Kolom M (13) = Penginterview
+      const existingLogs = logSheet.getRange(2, 4, lastRow - 1, 10).getDisplayValues();
       for (let i = 0; i < existingLogs.length; i++) {
         const rowKegId = String(existingLogs[i][0]).trim();
         const rowKelompok = String(existingLogs[i][8]).trim();
-        if (rowKegId === idKegiatan && rowKelompok.toLowerCase() === kelompokName.toLowerCase()) {
+        const rowPenginterviewRaw = String(existingLogs[i][9] || '').trim();
+        const rowKey = (rowPenginterviewRaw && rowPenginterviewRaw !== '-') ? rowPenginterviewRaw : rowKelompok;
+        if (rowKegId === idKegiatan && rowKey.toLowerCase() === penginterviewName.toLowerCase()) {
           queueCounter++;
         }
       }
@@ -1685,6 +1730,7 @@ function handleScanAttendance(payload) {
       payload.kelas,
       payload.statusPeserta || 'CALON SISWA',
       kelompokName,
+      rawPenginterview || '-',
       "'" + noAntrianFormatted,
       payload.statusKehadiran,
       payload.noWa,
@@ -1696,6 +1742,7 @@ function handleScanAttendance(payload) {
       idLog: idLog,
       waktu: payload.waktu || waktuWIB,
       kelompok: kelompokName,
+      penginterview: rawPenginterview || '-',
       antrian: noAntrianFormatted,
       waStatus: statusNotif
     };
@@ -2124,13 +2171,14 @@ function jsonResponse(obj) {
                 <p class="text-xs font-mono text-slate-500 mt-0.5">NISN: <span id="arrival-nisn" class="font-bold text-slate-700">-</span></p>
 
                 <div class="mt-3 grid grid-cols-2 gap-2">
-                    <div class="p-2.5 rounded-2xl bg-violet-50 border border-violet-200/80 text-center">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-violet-600">Kelompok / Ruang</span>
-                        <span id="arrival-kelompok" class="text-xs sm:text-sm font-extrabold text-violet-950 truncate block mt-0.5">Kelompok 1</span>
+                    <div class="p-2.5 rounded-2xl bg-teal-50 border border-teal-200/80 text-center">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-teal-700">Penginterview</span>
+                        <span id="arrival-penginterview-highlight" class="text-xs font-extrabold text-teal-950 truncate block mt-0.5">-</span>
+                        <span id="arrival-kelompok" class="text-[10px] font-bold text-violet-700 truncate block">Kelompok 1</span>
                     </div>
-                    <div class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-center">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-700">Nomor Antrian</span>
-                        <span id="arrival-antrian" class="text-base sm:text-lg font-mono font-black text-emerald-700 block leading-tight">#01</span>
+                    <div class="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-center flex flex-col justify-center">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-700">No. Antrian</span>
+                        <span id="arrival-antrian" class="text-xl sm:text-2xl font-mono font-black text-emerald-700 block leading-tight">#01</span>
                     </div>
                 </div>
 
@@ -2243,6 +2291,7 @@ function jsonResponse(obj) {
                     kelas: 'XII IPA 1',
                     statusPeserta: 'CALON SISWA',
                     kelompok: 'Kelompok 1',
+                    penginterview: 'Ustadz Ahmad Fauzan, S.Pd.',
                     antrian: '01',
                     status: 'Tepat Waktu',
                     wa: '6281234567802',
@@ -2442,13 +2491,33 @@ function jsonResponse(obj) {
             }
         });
 
+        function getQueueKeyForPenginterview(penginterviewName, fallbackKelompok) {
+            const cleanInterviewer = String(penginterviewName || '').trim();
+            if (cleanInterviewer && cleanInterviewer !== '-') {
+                return cleanInterviewer.toLowerCase().replace(/\s+/g, ' ');
+            }
+            return String(fallbackKelompok || 'Kelompok 1').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function getNextQueueNumberForPenginterview(idKegiatan, penginterviewName, fallbackKelompok) {
+            const targetKey = getQueueKeyForPenginterview(penginterviewName, fallbackKelompok);
+            const countInQueue = state.logs.filter(l => {
+                if (l.idKegiatan !== idKegiatan) return false;
+                const logInterviewer = l.penginterview && l.penginterview !== '-'
+                    ? l.penginterview
+                    : getPenginterviewForStudent({
+                        nisn: l.nisn,
+                        nama: l.namaSiswa,
+                        kelompok: l.kelompok,
+                        kelas: l.kelas
+                    }).nama;
+                return getQueueKeyForPenginterview(logInterviewer, l.kelompok) === targetKey;
+            }).length;
+            return String(countInQueue + 1).padStart(2, '0');
+        }
+
         function getNextQueueNumberForKelompok(idKegiatan, kelompokName) {
-            const cleanKelompok = String(kelompokName || 'Kelompok 1').trim().toLowerCase();
-            const countInGroup = state.logs.filter(l =>
-                l.idKegiatan === idKegiatan &&
-                String(l.kelompok || 'Kelompok 1').trim().toLowerCase() === cleanKelompok
-            ).length;
-            return String(countInGroup + 1).padStart(2, '0');
+            return getNextQueueNumberForPenginterview(idKegiatan, '', kelompokName);
         }
 
         async function triggerButtonWithProgress(btnEl, loadingText, actionCallback) {
@@ -3889,14 +3958,57 @@ function jsonResponse(obj) {
 
             const summaryContainer = document.getElementById('scanner-kelompok-summary');
             if (summaryContainer) {
-                const groups = [...new Set(state.siswa.map(s => s.kelompok || 'Kelompok 1'))].sort();
-                summaryContainer.innerHTML = groups.map(grp => {
-                    const grpLogs = eventLogs.filter(l => (l.kelompok || 'Kelompok 1') === grp);
-                    const lastQueue = grpLogs.length > 0 ? String(grpLogs.length).padStart(2, '0') : '00';
+                const queueBuckets = new Map();
+
+                // Kumpulkan daftar penginterview dari sheet Data_Penginterview terlebih dahulu
+                (state.penginterview || []).forEach(p => {
+                    const label = (p.nama && p.nama !== '-') ? p.nama.trim() : (p.kelompok || 'Kelompok 1');
+                    const key = getQueueKeyForPenginterview(p.nama, p.kelompok);
+                    if (!queueBuckets.has(key)) {
+                        queueBuckets.set(key, {
+                            key,
+                            label,
+                            subLabel: p.kelompok || p.ruangan || ''
+                        });
+                    }
+                });
+
+                // Pastikan siswa yang penginterview-nya belum terdaftar di sheet tetap terwakili
+                state.siswa.forEach(s => {
+                    const info = getPenginterviewForStudent(s);
+                    const hasInterviewer = info.nama && info.nama !== '-';
+                    const label = hasInterviewer ? info.nama : (s.kelompok || 'Kelompok 1');
+                    const key = getQueueKeyForPenginterview(info.nama, s.kelompok);
+                    if (!queueBuckets.has(key)) {
+                        queueBuckets.set(key, {
+                            key,
+                            label,
+                            subLabel: hasInterviewer ? (s.kelompok || '') : 'Belum ada penginterview'
+                        });
+                    }
+                });
+
+                const bucketList = Array.from(queueBuckets.values());
+                summaryContainer.innerHTML = bucketList.map(b => {
+                    const matchedLogs = eventLogs.filter(l => {
+                        const logInterviewer = l.penginterview && l.penginterview !== '-'
+                            ? l.penginterview
+                            : getPenginterviewForStudent({
+                                nisn: l.nisn,
+                                nama: l.namaSiswa,
+                                kelompok: l.kelompok,
+                                kelas: l.kelas
+                            }).nama;
+                        return getQueueKeyForPenginterview(logInterviewer, l.kelompok) === b.key;
+                    });
+                    const lastQueue = matchedLogs.length > 0 ? String(matchedLogs.length).padStart(2, '0') : '00';
                     return `
-                        <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-violet-50/70 border border-violet-200/70 text-[11px]">
-                            <span class="font-bold text-slate-700 truncate">${grp}</span>
-                            <span class="px-1.5 py-0.5 rounded-md bg-white text-violet-700 font-mono font-extrabold border border-violet-200 shadow-2xs">#${lastQueue}</span>
+                        <div class="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-teal-50/70 border border-teal-200/80 text-[11px]" title="${b.label}${b.subLabel ? ' (' + b.subLabel + ')' : ''}">
+                            <div class="min-w-0">
+                                <span class="font-bold text-slate-800 truncate block leading-tight">${b.label}</span>
+                                ${b.subLabel ? `<span class="text-[9px] font-semibold text-teal-700/80 truncate block">${b.subLabel}</span>` : ''}
+                            </div>
+                            <span class="px-1.5 py-0.5 rounded-md bg-white text-teal-700 font-mono font-extrabold border border-teal-200 shadow-2xs shrink-0">#${lastQueue}</span>
                         </div>
                     `;
                 }).join('');
@@ -3925,14 +4037,18 @@ function jsonResponse(obj) {
                 const studentObj = state.siswa.find(s => s.nisn === l.nisn);
                 const jk = l.jk || (studentObj ? studentObj.jk : 'Laki-laki');
                 const kelompok = l.kelompok || (studentObj ? studentObj.kelompok : 'Kelompok 1');
+                const interviewerName = (l.penginterview && l.penginterview !== '-')
+                    ? l.penginterview
+                    : getPenginterviewForStudent({ nisn: l.nisn, nama: l.namaSiswa, kelompok, kelas: l.kelas }).nama;
+                const displaySlot = (interviewerName && interviewerName !== '-') ? interviewerName : kelompok;
                 const antrian = l.antrian || '01';
                 return `
                     <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/95 border border-indigo-100 shadow-2xs shrink-0">
                         <div class="w-6 h-6 rounded-lg overflow-hidden shrink-0 border border-slate-200/80">
                             ${getGenderAvatarSvg(jk, 'w-6 h-6')}
                         </div>
-                        <span class="text-[11px] font-bold text-slate-800 truncate max-w-[120px]">${l.namaSiswa}</span>
-                        <span class="text-[10px] font-semibold text-violet-700">${kelompok}</span>
+                        <span class="text-[11px] font-bold text-slate-800 truncate max-w-[110px]">${l.namaSiswa}</span>
+                        <span class="text-[10px] font-semibold text-teal-700 truncate max-w-[120px]" title="${displaySlot}">${displaySlot}</span>
                         <span class="px-1.5 py-0.5 rounded-md text-[10px] font-mono font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             #${antrian}
                         </span>
@@ -4145,13 +4261,21 @@ function jsonResponse(obj) {
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     : 'bg-amber-50 text-amber-700 border-amber-200';
                 const kelompok = l.kelompok || 'Kelompok 1';
+                const interviewerName = (l.penginterview && l.penginterview !== '-')
+                    ? l.penginterview
+                    : getPenginterviewForStudent({ nisn: l.nisn, nama: l.namaSiswa, kelompok, kelas: l.kelas }).nama;
                 const antrian = l.antrian ? String(l.antrian).padStart(2, '0') : '01';
                 return `
                     <tr class="hover:bg-slate-50/80">
                         <td class="py-3 px-4">
                             <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono font-extrabold text-xs">#${antrian}</span>
-                                <span class="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 font-bold text-xs">${kelompok}</span>
+                                <span class="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono font-extrabold text-xs shrink-0">#${antrian}</span>
+                                <div class="min-w-0">
+                                    <span class="px-2 py-0.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 font-bold text-[11px] inline-block truncate max-w-[180px]" title="${interviewerName || '-'}">
+                                        <i class="fa-solid fa-user-tie text-[9px] mr-1"></i>${interviewerName && interviewerName !== '-' ? interviewerName : kelompok}
+                                    </span>
+                                    <span class="block text-[10px] font-semibold text-violet-700 mt-0.5">${kelompok}</span>
+                                </div>
                             </div>
                         </td>
                         <td class="py-3 px-4 font-mono text-xs font-bold text-slate-700">${l.waktu}</td>
@@ -4213,8 +4337,8 @@ function jsonResponse(obj) {
             const statusKehadiran = isLate ? 'Terlambat' : 'Tepat Waktu';
 
             const kelompokSiswa = student.kelompok || 'Kelompok 1';
-            const nomorAntrian = getNextQueueNumberForKelompok(activeEvent.id, kelompokSiswa);
             const interviewerInfo = getPenginterviewForStudent(student);
+            const nomorAntrian = getNextQueueNumberForPenginterview(activeEvent.id, interviewerInfo.nama, kelompokSiswa);
 
             const templateDataObj = {
                 nama: student.nama,
@@ -4300,6 +4424,7 @@ function jsonResponse(obj) {
             const countdownBar = document.getElementById('arrival-countdown-bar');
             const kelompokEl = document.getElementById('arrival-kelompok');
             const antrianEl = document.getElementById('arrival-antrian');
+            const penginterviewHighlightEl = document.getElementById('arrival-penginterview-highlight');
             const penginterviewRow = document.getElementById('arrival-penginterview-row');
             const penginterviewEl = document.getElementById('arrival-penginterview');
 
@@ -4316,6 +4441,8 @@ function jsonResponse(obj) {
                 kelas: logItem.kelas,
                 penginterview: logItem.penginterview
             });
+            const hasInterviewer = interviewerInfo.nama && interviewerInfo.nama !== '-';
+            const queueOwnerDisplay = hasInterviewer ? interviewerInfo.nama : kelompokVal;
 
             avatarEl.innerHTML = getGenderAvatarSvg(jk, 'w-full h-full');
             avatarEl.className = `w-20 h-20 rounded-2xl bg-white flex items-center justify-center mx-auto shadow-lg border-4 ${isDuplicate ? 'border-amber-200' : (female ? 'border-pink-100' : 'border-sky-100')} overflow-hidden`;
@@ -4323,10 +4450,11 @@ function jsonResponse(obj) {
             document.getElementById('arrival-name').textContent = logItem.namaSiswa;
             document.getElementById('arrival-nisn').textContent = logItem.nisn;
             document.getElementById('arrival-event').textContent = logItem.namaKegiatan;
+            if (penginterviewHighlightEl) penginterviewHighlightEl.textContent = queueOwnerDisplay;
             if (kelompokEl) kelompokEl.textContent = kelompokVal;
             if (antrianEl) antrianEl.textContent = `#${antrianVal}`;
             if (penginterviewRow && penginterviewEl) {
-                if (interviewerInfo.nama && interviewerInfo.nama !== '-') {
+                if (hasInterviewer) {
                     penginterviewEl.textContent = interviewerInfo.nama;
                     penginterviewRow.classList.remove('hidden');
                 } else {
@@ -4349,11 +4477,7 @@ function jsonResponse(obj) {
                 voicePill.classList.add('hidden');
 
                 dupAlert.classList.remove('hidden');
-                dupText.innerHTML = `Ananda <b>${panggilan}</b> sudah terdaftar di <b>${kelompokVal} (Antrian #${antrianVal})</b>!`;
-
-                infoBox.className = 'mt-3 bg-amber-50/60 rounded-2xl p-3.5 border border-amber-200/80 text-xs space-y-2.5 text-left';
-                timeLabel.innerHTML = `<i class="fa-regular fa-clock text-amber-600 w-4 text-center"></i> Tercatat Pukul`;
-                timeEl.className = 'font-mono font-bold text-amber-700 text-sm';
+                dupText.innerHTML = `Ananda <b>${panggilan}</b> sudah terdaftar pada <b>${queueOwnerDisplay} (Antrian #${antrianVal})</b>!`;
                 countdownBar.className = 'h-full w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500';
             } else {
                 headerEl.className = 'relative bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 pt-6 pb-12 px-5 text-white text-center overflow-hidden';
@@ -5256,7 +5380,7 @@ function jsonResponse(obj) {
                     }
                     if (Array.isArray(data.logs)) {
                         state.logs = data.logs.slice().reverse().map(r => {
-                            if (r.length >= 16) {
+                            if (r.length >= 17) {
                                 return {
                                     id: r[0],
                                     waktu: r[2],
@@ -5269,6 +5393,29 @@ function jsonResponse(obj) {
                                     kelas: r[9],
                                     statusPeserta: r[10] || 'CALON SISWA',
                                     kelompok: r[11] || 'Kelompok 1',
+                                    penginterview: r[12] || getPenginterviewForStudent({ nisn: String(r[5]).replace(/^'/, ''), nama: r[6], kelompok: r[11] || 'Kelompok 1', kelas: r[9] }).nama,
+                                    antrian: String(r[13] || '01').replace(/^'/, '').padStart(2, '0'),
+                                    status: r[14],
+                                    wa: r[15],
+                                    waStatus: r[16]
+                                };
+                            }
+                            if (r.length >= 16) {
+                                const nisnClean = String(r[5]).replace(/^'/, '');
+                                const kelVal = r[11] || 'Kelompok 1';
+                                return {
+                                    id: r[0],
+                                    waktu: r[2],
+                                    idKegiatan: r[3],
+                                    namaKegiatan: r[4],
+                                    nisn: nisnClean,
+                                    namaSiswa: r[6],
+                                    panggilan: r[7] || formatNamaPanggilan(r[6]),
+                                    jk: r[8] || 'Laki-laki',
+                                    kelas: r[9],
+                                    statusPeserta: r[10] || 'CALON SISWA',
+                                    kelompok: kelVal,
+                                    penginterview: getPenginterviewForStudent({ nisn: nisnClean, nama: r[6], kelompok: kelVal, kelas: r[9] }).nama,
                                     antrian: String(r[12] || '01').replace(/^'/, '').padStart(2, '0'),
                                     status: r[13],
                                     wa: r[14],
@@ -5276,36 +5423,40 @@ function jsonResponse(obj) {
                                 };
                             }
                             if (r.length >= 14) {
+                                const nisnClean = String(r[5]).replace(/^'/, '');
                                 return {
                                     id: r[0],
                                     waktu: r[2],
                                     idKegiatan: r[3],
                                     namaKegiatan: r[4],
-                                    nisn: String(r[5]).replace(/^'/, ''),
+                                    nisn: nisnClean,
                                     namaSiswa: r[6],
                                     panggilan: r[7] || formatNamaPanggilan(r[6]),
                                     jk: r[8] || 'Laki-laki',
                                     kelas: r[9],
                                     statusPeserta: r[10] || 'CALON SISWA',
                                     kelompok: 'Kelompok 1',
+                                    penginterview: getPenginterviewForStudent({ nisn: nisnClean, nama: r[6], kelompok: 'Kelompok 1', kelas: r[9] }).nama,
                                     antrian: '01',
                                     status: r[11],
                                     wa: r[12],
                                     waStatus: r[13]
                                 };
                             }
+                            const nisnClean = String(r[5]).replace(/^'/, '');
                             return {
                                 id: r[0],
                                 waktu: r[2],
                                 idKegiatan: r[3],
                                 namaKegiatan: r[4],
-                                nisn: String(r[5]).replace(/^'/, ''),
+                                nisn: nisnClean,
                                 namaSiswa: r[6],
                                 panggilan: formatNamaPanggilan(r[6]),
                                 jk: r[7] || 'Laki-laki',
                                 kelas: r[8],
                                 statusPeserta: 'CALON SISWA',
                                 kelompok: 'Kelompok 1',
+                                penginterview: getPenginterviewForStudent({ nisn: nisnClean, nama: r[6], kelompok: 'Kelompok 1', kelas: r[8] }).nama,
                                 antrian: '01',
                                 status: r[9],
                                 wa: r[10],
@@ -5348,6 +5499,12 @@ function jsonResponse(obj) {
                 kelas: logItem.kelas,
                 statusPeserta: logItem.statusPeserta || 'CALON SISWA',
                 kelompok: logItem.kelompok || 'Kelompok 1',
+                penginterview: logItem.penginterview || getPenginterviewForStudent({
+                    nisn: logItem.nisn,
+                    nama: logItem.namaSiswa,
+                    kelompok: logItem.kelompok,
+                    kelas: logItem.kelas
+                }).nama || '-',
                 antrian: logItem.antrian || '01',
                 statusKehadiran: logItem.status,
                 noWa: logItem.wa,
@@ -5419,6 +5576,8 @@ function jsonResponse(obj) {
                 jk: sampleStudent.jk || 'Laki-laki',
                 kelas: sampleStudent.kelas || 'Kelas 1',
                 statusPeserta: sampleStudent.statusPeserta || 'CALON SISWA',
+                kelompok: sampleStudent.kelompok || 'Kelompok 1',
+                penginterview: getPenginterviewForStudent(sampleStudent).nama || '-',
                 status: 'Tepat Waktu',
                 wa: sampleStudent.wa || '',
                 waMessage: 'Tes tulis log ke Google Sheet'
@@ -5613,19 +5772,24 @@ function jsonResponse(obj) {
                 showToast('Belum ada data log untuk diekspor.', 'warning');
                 return;
             }
-            const headers = ['ID Log', 'No Antrian', 'Kelompok', 'Waktu', 'Kegiatan', 'NISN', 'Nama Siswa', 'Kelas', 'Status', 'No WA', 'Status WA'];
-            const rows = state.logs.map(l => [
-                l.id, `'${l.antrian || '01'}`, `"${l.kelompok || 'Kelompok 1'}"`, l.waktu, `"${l.namaKegiatan}"`, `'${l.nisn}`, `"${l.namaSiswa}"`, l.kelas, l.status, l.wa, `"${l.waStatus}"`
-            ]);
+            const headers = ['ID Log', 'No Antrian', 'Penginterview', 'Kelompok', 'Waktu', 'Kegiatan', 'NISN', 'Nama Siswa', 'Kelas', 'Status', 'No WA', 'Status WA'];
+            const rows = state.logs.map(l => {
+                const interviewerName = (l.penginterview && l.penginterview !== '-')
+                    ? l.penginterview
+                    : getPenginterviewForStudent({ nisn: l.nisn, nama: l.namaSiswa, kelompok: l.kelompok, kelas: l.kelas }).nama;
+                return [
+                    l.id, `'${l.antrian || '01'}`, `"${interviewerName || '-'}"`, `"${l.kelompok || 'Kelompok 1'}"`, l.waktu, `"${l.namaKegiatan}"`, `'${l.nisn}`, `"${l.namaSiswa}"`, l.kelas, l.status, l.wa, `"${l.waStatus}"`
+                ];
+            });
             const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');
             link.setAttribute('href', encodedUri);
-            link.setAttribute('download', `Log_Absensi_Antrian_QR_${new Date().toISOString().slice(0,10)}.csv`);
+            link.setAttribute('download', `Log_Absensi_Antrian_Penginterview_${new Date().toISOString().slice(0,10)}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            showToast('File CSV Log Kehadiran & Antrian berhasil diunduh!', 'success');
+            showToast('File CSV Log Kehadiran & Antrian Penginterview berhasil diunduh!', 'success');
         }
 
         function clearLogsConfirm() {
